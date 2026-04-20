@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>跑步單字練習</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f5; min-height: 100vh; padding: 1rem; }
+#app { max-width: 480px; margin: 0 auto; padding: 1rem 0; }
+.header { text-align: center; margin-bottom: 1.25rem; }
+.header h1 { font-size: 20px; font-weight: 500; color: #1a1a1a; }
+.header p { font-size: 13px; color: #888; margin-top: 4px; }
+.card { background: #fff; border: 0.5px solid #e0e0e0; border-radius: 12px; padding: 1.25rem; margin-bottom: 12px; }
+.word-display { text-align: center; padding: 1rem 1rem 1.25rem; }
+.year-badge { display: inline-block; font-size: 11px; font-weight: 500; background: #e8f0fe; color: #1a73e8; padding: 3px 10px; border-radius: 8px; margin-bottom: 10px; }
+.word-en { font-size: 28px; font-weight: 500; color: #1a1a1a; margin-bottom: 5px; letter-spacing: -0.5px; }
+.word-zh { font-size: 15px; color: #555; margin-bottom: 8px; }
+.options-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; margin-top: 8px; }
+.opt-chip { font-size: 11px; padding: 2px 8px; border-radius: 20px; background: #f0f0f0; color: #999; border: 0.5px solid #e0e0e0; }
+.opt-chip.active { background: #e8f0fe; color: #1a73e8; border-color: transparent; font-weight: 500; }
+.word-num { font-size: 12px; color: #bbb; margin-top: 10px; }
+.progress-bar-wrap { background: #f0f0f0; border-radius: 4px; height: 4px; margin-bottom: 1rem; overflow: hidden; }
+.progress-bar { height: 4px; background: #378ADD; border-radius: 4px; transition: width 0.3s; }
+.controls { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 4px; }
+.btn { border: 0.5px solid #ccc; background: transparent; color: #333; border-radius: 8px; padding: 8px 14px; font-size: 14px; cursor: pointer; font-family: inherit; transition: background 0.15s; }
+.btn:hover { background: #f5f5f5; }
+.btn:active { transform: scale(0.97); }
+.btn-play { background: #e8f0fe; color: #1a73e8; border: none; padding: 10px 28px; font-size: 15px; font-weight: 500; }
+.btn-play:hover { opacity: 0.85; }
+.settings { border-top: 0.5px solid #eee; padding-top: 12px; }
+.setting-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; font-size: 13px; color: #888; }
+.setting-row label { flex: 0 0 60px; }
+.setting-row input[type=range] { flex: 1; }
+.setting-row span { font-size: 13px; color: #333; min-width: 36px; text-align: right; }
+.status { text-align: center; font-size: 12px; color: #bbb; margin-top: 8px; }
+select { border: 0.5px solid #ccc; border-radius: 8px; background: #fff; color: #333; font-size: 13px; padding: 4px 8px; font-family: inherit; }
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="header">
+    <h1>跑步單字練習</h1>
+    <p>大學學測英文單字 — 全選項美式發音</p>
+  </div>
+
+  <div class="card">
+    <div class="word-display">
+      <div class="year-badge" id="year-badge">114年 第1題</div>
+      <div class="word-en" id="word-en">—</div>
+      <div class="word-zh" id="word-zh">—</div>
+      <div class="options-row" id="opts-row"></div>
+      <div class="word-num" id="word-num">— / —</div>
+    </div>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar" id="progress-bar" style="width:0%"></div>
+    </div>
+    <div class="controls">
+      <button class="btn" onclick="prevItem()">上一個</button>
+      <button class="btn btn-play" id="btn-play" onclick="togglePlay()">播放</button>
+      <button class="btn" onclick="nextItem()">下一個</button>
+    </div>
+  </div>
+
+  <div class="card settings">
+    <div style="font-size:13px;font-weight:500;color:#1a1a1a;margin-bottom:10px;">設定</div>
+    <div class="setting-row">
+      <label>年度</label>
+      <select id="year-filter" onchange="applyFilter()">
+        <option value="all">全部</option>
+        <option value="115">115年</option>
+        <option value="114">114年</option>
+        <option value="113">113年</option>
+        <option value="112">112年</option>
+        <option value="111">111年</option>
+        <option value="110">110年</option>
+        <option value="109">109年</option>
+        <option value="108">108年</option>
+        <option value="107">107年</option>
+        <option value="106">106年</option>
+        <option value="105">105年</option>
+        <option value="104">104年</option>
+        <option value="103">103年</option>
+        <option value="102">102年</option>
+        <option value="101">101年</option>
+        <option value="100">100年</option>
+        <option value="98">98年</option>
+      </select>
+    </div>
+    <div class="setting-row">
+      <label>朗讀速度</label>
+      <input type="range" id="rate-slider" min="0.5" max="1.5" step="0.1" value="0.85" oninput="updateRate()">
+      <span id="rate-val">0.9x</span>
+    </div>
+    <div class="setting-row">
+      <label>間隔時間</label>
+      <input type="range" id="pause-slider" min="0.5" max="5" step="0.5" value="1.5" oninput="updatePause()">
+      <span id="pause-val">1.5秒</span>
+    </div>
+    <div class="setting-row">
+      <label>隨機播放</label>
+      <input type="checkbox" id="shuffle-chk" onchange="applyFilter()">
+    </div>
+  </div>
+  <div class="status" id="status">載入中...</div>
+</div>
+
+<script>
+const DATA = [
+[115,1,"quashed","推翻/撤銷",["cosseted","寵愛"],["negotiated","談判"],["overturned","推翻/撤銷"],["postponed","延期"],["reaffirmed","重申"]],
+[115,2,"exhaustive","詳盡的/全面的",["comprehensive","詳盡的"],["fragmented","破碎的"],["partial","部分的"],["selective","選擇性的"],["tentative","初步的"]],
+[115,3,"vigil","儀式/守夜",["confidence","信心"],["excellence","卓越"],["observance","儀式/遵守"],["persistence","堅持"],["reverence","尊崇"]],
+[115,4,"mitigate","減輕/緩和",["aggravate","惡化"],["alleviate","減輕/緩和"],["complicate","使複雜"],["exacerbate","使惡化"],["perpetuate","使永存"]],
+[115,5,"persistent","持續的/堅韌的",["capricious","反覆無常"],["congenial","投緣的"],["ephemeral","短暫的"],["superficial","表面的"],["tenacious","堅韌的"]],
+[115,6,"adverse","有害的/不利的",["cumulative","累積的"],["delayed","延遲的"],["harmful","有害的/不利的"],["negligible","微不足道的"],["unequivocal","明確的"]],
+[115,7,"sanctions","限制/制裁",["recruitments","招募"],["resolutions","決議"],["restrictions","限制/制裁"],["sanitations","公共衛生"],["syndromes","症候群"]],
+[115,8,"encroachment","侵害/侵犯",["adjustment","調整"],["contentment","滿足"],["deployment","部署"],["infringement","侵害/侵犯"],["resentment","怨恨"]],
+[115,9,"recalcitrant","頑固的/難處理的",["acquiescent","默認的"],["complaisant","順從的"],["deferential","恭敬的"],["intractable","難處理/頑固"],["subservient","屈從的"]],
+[115,10,"moribund","停滯的/無生氣的",["cyclical","週期的"],["embryonic","初期的"],["precarious","不穩定的"],["torpid","遲鈍/停滯"],["volatile","易變的"]],
+[115,11,"cavalier","漫不經心的",["clumsy","笨拙的"],["dexterous","靈巧的"],["lethargic","昏睡的"],["negligent","疏忽的"],null],
+[115,12,"Adaptable","能適應的",["Benevolent","仁慈的"],["Conscientious","盡責的"],["Narcissistic","自戀的"],["Interfering","干涉的"],null],
+[115,13,"pernicious","有害的",["reciprocal","互惠的"],["sanguine","樂觀的"],["tenuous","纖細的"],["ubiquitous","普遍存在的"],null],
+[115,14,"analgesic","止痛劑",["antibiotic","抗生素"],["antidepressant","抗憂鬱"],["sedative","鎮靜劑"],["stimulant","興奮劑"],null],
+[115,15,"gauging","測量",["gracing","點綴"],["grasping","抓取"],["gratifying","使滿足"],["grieving","悲痛"],null],
+[115,16,"dampens","抑制",["dazzles","眩目"],["decelerates","減速"],["defiles","汙損"],["delegates","授權"],null],
+[115,17,"diagnosis","診斷",["intervention","干預"],["prescription","處方"],["prognosis","預後"],["symptom","症狀"],null],
+[115,18,"egregious","極壞的",["impecunious","貧窮的"],["meticulous","細心的"],["ostentatious","炫耀的"],["superfluous","多餘的"],null],
+[115,19,"comparative","比較的",["compelling","引人入勝"],["grandiose","浮誇的"],["judicious","明智的"],["pragmatic","務實的"],null],
+[115,20,"hackneyed","陳腐的",["interdicted","禁令"],["laminated","層壓的"],["proclaimed","宣告的"],["scorched","燒焦的"],null],
+[114,1,"prolific","多產的",["aggressive","侵略的"],["beneficial","有益的"],["perilous","危險的"],["pessimistic","悲觀的"],["productive","多產的"]],
+[114,2,"interim","臨時的",["conclusive","決定性的"],["enduring","持久的"],["irrevocable","不可撤換/不可逆的"],["perpetual","永久的"],["provisional","臨時的"]],
+[114,3,"stringent","嚴格的",["adhesive","黏性的"],["cynical","憤世嫉俗"],["lenient","寬鬆的"],["orthodox","正統的"],["rigorous","嚴格的"]],
+[114,4,"initial","最初的",["aesthetic","美學的"],["cardinal","主要的"],["manifest","明顯的"],["preliminary","初步的"],["warranted","保證的"]],
+[114,5,"withdrew","隱退的",["captivated","著迷的"],["extracted","提取的"],["justified","證明的"],["recruited","招募的"],["secluded","隱居的"]],
+[114,6,"fallacious","謬誤的",["deceptive","欺騙的"],["erroneous","錯誤的"],["fluctuated","波動的"],["inconclusive","非決定性的"],["inventive","發明的"]],
+[114,7,"insinuate","暗示",["assert","主張"],["elucidate","闡明"],["imply","暗示"],["proclaim","宣告"],["substantiate","證實"]],
+[114,8,"judiciously","明智地",["arbitrarily","武斷地"],["haphazardly","隨意地"],["indiscriminately","不加區別地"],["prudently","謹慎地"],["recklessly","魯莽地"]],
+[114,9,"astute","機敏的",["apathetic","冷淡的"],["astounding","驚人的"],["oblivious","遺忘的"],["shrewd","精明的"],["sluggish","遲緩的"]],
+[114,10,"impairs","損害",["deteriorates","惡化"],["elevates","提高"],["fortifies","加強"],["palpitates","悸動"],["supplants","取代"]],
+[114,11,"casualty","傷亡",["chemical","化學的"],["geological","地理的"],["inventory","清點"],["textile","紡織的"],null],
+[114,12,"ascending","上升",["consenting","同意"],["descending","下降"],["presenting","呈現"],["resenting","怨恨"],null],
+[114,13,"contextualize","置於語境",["jeopardize","危及"],["legitimize","合法"],["prioritize","優先"],["scrutinize","審查"],null],
+[114,14,"maliciously","惡意地",["meticulously","細心地"],["precariously","危險地"],["presumptuously","冒昧地"],["pretentiously","矯飾地"],null],
+[114,15,"anomaly","異常",["fragment","碎片"],["monotony","單調"],["rigidity","僵硬"],["spectrum","範圍"],null],
+[114,16,"accelerate","加速",["elicit","誘發"],["ignite","點燃"],["permeate","滲透"],["repent","後悔"],null],
+[114,17,"arthritic","關節的",["divergent","分歧的"],["embryonic","初期的"],["obscene","淫穢的"],["uncultivated","未開發的"],null],
+[114,18,"apprentice","學徒",["bureaucrat","官僚"],["mogul","大亨"],["novice","新手"],["philanthropist","慈善家"],null],
+[114,19,"caprice","反覆無常",["cheetah","獵豹"],["edifice","宏偉建築"],["erudition","博學"],["machismo","大男人主義"],null],
+[114,20,"esoteric","深奧的",["hedonistic","享樂的"],["lubricious","好色的"],["pristine","原始的"],["untrammeled","不受限的"],null],
+[113,1,"equivocations","含糊其辭",["ambiguity","歧義"],["brevity","簡潔"],["clarity","清晰"],["deficiency","不足"],["efficiency","效率"]],
+[113,2,"digressive","離題的",["concise","簡潔的"],["constructive","建設性"],["dispensable","非必要"],["irrelevant","無關的"],["meandering","離題的"]],
+[113,3,"depletion","枯竭",["animation","動畫"],["defection","背叛"],["enlargement","擴大"],["overflow","溢出"],["reduction","減少"]],
+[113,4,"deftly","靈巧地",["abruptly","突然地"],["brusquely","粗魯地"],["clumsily","笨拙地"],["ingeniously","靈巧地"],["listlessly","倦怠地"]],
+[113,5,"spiralling","劇增的",["ecstatic","欣喜的"],["edifying","啟發的"],["emphatic","強調的"],["escalating","升級的"],["euphoric","愉悅的"]],
+[113,6,"decimating","大批毀滅",["accumulate","累積"],["alienate","疏遠"],["amalgamate","合併"],["ameliorate","改善"],["annihilate","殲滅"]],
+[113,7,"perilous","危險的",["precancerous","癌前的"],["precarious","不穩定的"],["precautionary","預防的"],["precious","珍貴的"],["precipitous","陡峭的"]],
+[113,8,"unadorned","簡樸的",["aesthetic","美學的"],["agitated","不安的"],["alleged","聲稱的"],["anterior","前面的"],["austere","簡樸的"]],
+[113,9,"pedestrian","平庸的",["proactive","積極的"],["probationary","實習的"],["procedural","程序的"],["prodigious","巨大的"],["prosaic","乏味的"]],
+[113,10,"paramount","最重要的",["preparatory","準備的"],["preponderant","優勢的"],["prepositional","前置的"],["preposterous","荒謬的"],["prepubescent","青春期前"]],
+[113,11,"conformity","遵守",["divergence","分歧"],["impasse","僵局"],["sleight","技巧"],["surplus","剩餘"],null],
+[113,12,"candid","坦率的",["evasive","逃避的"],["laconic","簡潔的"],["restrained","受限的"],["reticent","沉默的"],null],
+[113,13,"appal","驚駭",["apparatchik","官僚"],["apparatus","儀器"],["apparition","幽靈"],["appeal","呼籲"],null],
+[113,14,"debilitate","虛弱",["demoralize","消沉"],["emasculate","削弱"],["galvanize","激勵"],["paralyze","癱瘓"],null],
+[113,15,"eclecticism","折衷主義",["ethnocentrism","種族中心"],["parallelism","平行"],["pauperism","貧困"],["populism","民粹主義"],null],
+[113,16,"addictive","成癮的",["dimensional","維度的"],["melancholic","憂鬱的"],["sagacious","睿智的"],["vindictive","報復的"],null],
+[113,17,"assailed","攻擊",["besieged","圍攻"],["bombarded","轟炸"],["coerced","強迫"],["leavened","生動的"],null],
+[113,18,"declension","衰退",["dereliction","失職"],["detonation","爆炸"],["discretion","慎重"],["disposition","傾向"],null],
+[113,19,"hindrance","阻礙",["intervention","干預"],["miniature","微型"],["peak","巔峰"],["vain","徒勞"],null],
+[113,20,"disavowed","否認",["displaced","取代"],["dissolved","溶解"],["distended","膨脹"],["distracted","分心"],null],
+[112,1,"salvage","挽回",["redeem","補救"],["relapse","復發"],["repel","擊退"],["revere","尊敬"],["revoke","撤銷"]],
+[112,2,"latent","潛在的",["underdeveloped","未發育"],["underestimated","低估"],["underlying","潛在的"],["undermining","破壞"],["undertaking","承擔"]],
+[112,3,"ambivalence","矛盾",["disgrace","恥辱"],["empathy","同理"],["hesitancy","猶豫"],["objection","反對"],["resentment","怨恨"]],
+[112,4,"prodigal","揮霍的",["abandoned","遺棄的"],["extravagant","奢侈的"],["peripheral","次要的"],["temporary","暫時的"],["vulnerable","易受傷"]],
+[112,5,"stagnant","停滯的",["aberrant","異常的"],["concomitant","伴隨的"],["dormant","休眠的"],["mutant","變異的"],["nonchalant","冷淡的"]],
+[112,6,"obfuscate","模糊",["articulate","清晰的"],["elucidate","闡明"],["mollify","緩和"],["perplex","困惑"],["refurbish","翻新"]],
+[112,7,"soporific","催眠的",["abstruse","深奧的"],["effervescent","沸騰的"],["garrulous","多嘴的"],["narcissistic","自戀"],["somnolent","想睡的"]],
+[112,8,"placate","安撫",["berate","責罵"],["coddle","寵愛"],["efface","抹去"],["pacify","安撫"],["tamper","竄改"]],
+[112,9,"demographic","人口統計",["diluted","稀釋"],["disrupted","中斷"],["distorted","扭曲"],["varied","多樣的"],["verified","證實的"]],
+[112,10,"dissuade","勸阻",["deter","阻礙"],["detain","拘留"],["impel","推動"],["propel","推進"],["refrain","節制"]],
+[112,11,"eclectic","折衷的",["eligible","合格的"],["erratic","反覆無常"],["erudite","博學的"],["evocative","喚起的"],null],
+[112,12,"cryptic","神秘的",["fecund","多產的"],["lucid","清晰的"],["solicitous","關心的"],["tonic","滋補的"],null],
+[112,13,"apogee","最高點",["nadir","最低點"],["pinnacle","頂峰"],["summit","高峰"],["zenith","頂點"],null],
+[112,14,"elongate","延長",["elucidate","闡明"],["emigrate","移居"],["emulate","效法"],["evacuate","撤離"],null],
+[112,15,"derogatory","貶損的",["gregarious","社交的"],["laudable","值得讚賞"],["pedagogical","教學的"],["translucent","半透的"],null],
+[112,16,"benevolent","仁慈的",["fraudulent","詐騙的"],["negligent","疏忽的"],["pertinent","相關的"],["solvent","有償債能力"],null],
+[112,17,"safeguard","保護",["segregate","隔離"],["subtract","減去"],["supplant","取代"],["systemize","系統化"],null],
+[112,18,"enacted","制定",["enchanted","著迷的"],["engraved","雕刻的"],["engulfed","淹沒的"],["enlisted","徵募的"],null],
+[112,19,"barge","駁船",["barren","荒蕪的"],["boom","繁榮"],["bulge","腫脹"],["bulk","大量"],null],
+[112,20,"fertile","肥沃的",["fictional","虛構的"],["figurative","比喻的"],["forged","鍛造的"],["fragile","脆弱的"],null],
+[111,1,"withheld","保留",["enacted","制定"],["enabled","使能夠"],["endowed","賦予"],["enlarged","擴大"],["engaged","參與"]],
+[111,2,"sabotage","破壞",["operate","操作"],["offend","冒犯"],["ordain","任命"],["obstruct","阻礙"],["object","反對"]],
+[111,3,"debris","殘骸",["racket","喧嚷"],["revel","狂歡"],["ritual","典禮"],["roulette","輪盤"],["rubble","碎石"]],
+[111,4,"incongruous","不協調",["incoherent","不連貫"],["incompatible","不相容"],["incomparable","無雙"],["inconceivable","不可想像"],["inconclusive","無結果"]],
+[111,5,"vitriolic","刻薄的",["caustic","刻薄的"],["flattering","奉承的"],["insightful","具見地"],["nonsensical","荒謬的"],["unprofessional","非專業"]],
+[111,6,"inadvertence","疏忽",["overlap","重疊"],["overpressure","超壓"],["overture","序曲"],["oversight","疏忽"],["overhaul","大修"]],
+[111,7,"nuances","細微差別",["mixtures","混合物"],["niceties","細微差別"],["priorities","優先順序"],["rattles","格格聲"],["segments","片段"]],
+[111,8,"convoluted","複雜的",["nefarious","邪惡的"],["decorous","禮貌的"],["tortuous","曲折的"],["humongous","巨大的"],["notorious","臭名昭彰"]],
+[111,9,"haphazard","雜亂的",["deprecatory","反對的"],["depository","存放處"],["declamatory","雄辯的"],["depilatory","除毛的"],["desultory","雜亂的"]],
+[111,10,"rock-bottom","最低點",["zenith","頂點"],["pinnacle","巔峰"],["summit","高峰"],["nadir","最低點"],["tyro","新手"]],
+[111,11,"outage","停電",["outrage","憤怒"],["outburst","爆發"],["outlook","展望"],["outbreak","爆發"],null],
+[111,12,"chronic","慢性的",["intrinsic","內在的"],["nebulous","模糊的"],["proficient","精通的"],["receptive","接受的"],null],
+[111,13,"morale","士氣",["morality","道德"],["morpheme","語素"],["morass","困局"],["mortgage","抵押"],null],
+[111,14,"depicting","描繪",["revising","修訂"],["unfertilizing","無效力"],["satirizing","諷刺"],["destabilizing","不穩定"],null],
+[111,15,"pranked","捉弄",["slanted","偏見的"],["parachuted","空降"],["slaughtered","屠殺"],["evacuated","疏散"],null],
+[111,16,"cursory","草率的",["elegiac","哀歌的"],["fallacious","謬誤的"],["oblivious","遺忘的"],["susceptible","易受影響"],null],
+[111,17,"anonymous","匿名的",["flamboyant","艷麗的"],["mandatory","強制的"],["respiratory","呼吸的"],["volatile","易變的"],null],
+[111,18,"pejorative","貶義的",["penurious","貧窮的"],["perilous","危險的"],["peripatetic","流動的"],["petrifying","驚人的"],null],
+[111,19,"vertiginous","眩暈的",["eponymous","同名的"],["presumptuous","冒失的"],["spurious","偽造的"],["unscrupulous","無道德"],null],
+[111,20,"mouldy","發霉的",["racy","活潑的"],["frugal","節儉的"],["prodigal","揮霍的"],["savoury","美味的"],null],
+[110,1,"scrupulous","細心的",["economical","節省的"],["conscientious","謹慎的"],["innovative","創新的"],["efficient","效率的"],["immaterial","無關的"]],
+[110,2,"pinnacle","頂峰",["artefact","製品"],["caveat","警告"],["heyday","全盛期"],["impunity","免罰"],["reverence","尊敬"]],
+[110,3,"paucity","缺乏",["dearth","缺乏"],["elasticity","彈性"],["interim","中期"],["plateau","高原"],["tabloid","小報"]],
+[110,4,"accelerate","加速",["warrant","保證"],["quicken","加快"],["precede","在先"],["obscure","模糊"],["complicate","複雜"]],
+[110,5,"peripheral","次要的",["arduous","艱鉅的"],["immediate","立即的"],["trivial","瑣碎的"],["previous","先前"],["tedious","冗長的"]],
+[110,6,"exacerbated","惡化",["aggravated","惡化"],["contributed","貢獻"],["moderated","緩和"],["negotiated","談判"],["stimulated","刺激"]],
+[110,7,"reminiscent","喚起的",["advocative","擁護的"],["evocative","喚起的"],["provocative","挑釁的"],["reciprocative","互惠的"],["suffocative","窒息的"]],
+[110,8,"obliterated","抹除",["fabricated","編造"],["expunged","抹除"],["revamped","翻新"],["preserved","保存"],["mended","修補"]],
+[110,9,"enervated","衰弱",["fortified","加強"],["galvanized","激勵"],["debilitated","衰弱"],["invigorated","鼓舞"],["strengthened","加強"]],
+[110,10,"promulgated","發佈",["announced","宣佈"],["confounded","困惑"],["repented","後悔"],["proposed","建議"],["unraveled","解開"]],
+[110,11,"circumscribed","限制",["abrasive","磨損的"],["comprehensive","詳盡"],["abbreviated","縮寫"],["restrictive","限制的"],null],
+[110,12,"versatile","多才多藝",["dull","單調的"],["inept","無能的"],["amateur","業餘的"],["inflexible","不屈的"],null],
+[110,13,"perplexity","困惑",["assurance","保證"],["placidity","平靜"],["tranquility","寧靜"],["quietude","安靜"],null],
+[110,14,"perishes","消滅",["perspires","流汗"],["postpones","延期"],["postulates","假設"],["precipitates","促成"],null],
+[110,15,"digress","離題",["dilate","膨脹"],["derail","脫軌"],["decry","責難"],["divert","轉移"],null],
+[110,16,"penetrate","滲透",["nurture","培育"],["circumvent","規避"],["satiate","滿足"],["quench","壓制"],null],
+[110,17,"validate","證實",["sanction","制裁"],["garnish","裝飾"],["expedite","加速"],["bolster","加強"],null],
+[110,18,"infrastructure","基礎建設",["cyberstructure","網路架構"],["microstructure","微觀結構"],["neurostructure","神經結構"],["paleostructure","古老結構"],null],
+[110,19,"concomitant","伴隨的",["dominant","支配的"],["indignant","憤怒的"],["repugnant","反感的"],["stagnant","停滯的"],null],
+[110,20,"cognitive","認知的",["cognizant","認識的"],["conspicuous","顯眼的"],["consistent","一致的"],["contradictory","矛盾的"],null],
+[109,1,"debacle","潰敗",["asylum","收容所"],["carnage","屠殺"],["latitude","緯度"],["fiasco","徹底失敗"],["panorama","全景"]],
+[109,2,"menace","威脅",["initiation","開始"],["intimidation","恐嚇"],["intimacy","親密"],["implantation","植入"],["immersion","浸泡"]],
+[109,3,"meticulous","細心的",["rebellious","反叛的"],["malicious","惡意的"],["indignant","憤怒的"],["fastidious","苛求的"],["cursory","草率的"]],
+[109,4,"erudite","博學的",["bluffing","嚇唬的"],["exulting","歡欣的"],["assiduous","勤勉的"],["congenial","投緣的"],["sagacious","睿智的"]],
+[109,5,"vociferous","大聲的",["equivocal","含糊的"],["impending","逼近的"],["complementary","補充"],["strident","刺耳的"],["veritable","真實的"]],
+[109,6,"benevolence","仁慈",["betrothal","訂婚"],["beneficence","慈善"],["belligerence","好戰"],["bereavement","喪親"],["beneficiary","受益人"]],
+[109,7,"annihilation","殲滅",["enchantment","著迷"],["equilibrium","平衡"],["enticement","誘惑"],["eradication","根除"],["evacuation","撤離"]],
+[109,8,"capricious","反覆無常",["mercurial","漂忽"],["notable","顯著的"],["prospective","預期的"],["subtle","細微的"],["tangible","具體的"]],
+[109,9,"serendipitous","偶然",["egregious","極壞的"],["fortuitous","偶然的"],["insidious","隱患的"],["luminous","發光的"],["ominous","不祥的"]],
+[109,10,"conducive","有益的",["Dissidence","異議"],["Obstinacy","頑固"],["Forbearance","自制"],["Presentiment","預感"],["Rigidity","僵硬"]],
+[109,11,"castrating","閹割",["stimulating","啟發的"],["urinating","排尿的"],["berating","責罵的"],["discriminating","歧視"],null],
+[109,12,"acclaimed","讚譽的",["disclaimed","否認的"],["claimed","聲稱的"],["proclaimed","宣告的"],["reclaimed","開墾的"],null],
+[109,13,"culpable","有罪的",["culinary","烹飪的"],["curative","治癒的"],["curbside","路邊的"],["custody","監護"],null],
+[109,14,"accountability","責任",["inevitability","必然"],["promiscuity","濫交"],["spontaneity","自發"],["varsity","代表隊"],null],
+[109,15,"arraigned","提訊",["aggravated","惡化"],["arrogated","冒稱"],["abrogated","廢除"],["assassinated","暗殺"],null],
+[109,16,"claustrophobic","幽閉",["dipsomaniac","酗酒"],["kleptomaniac","竊盜"],["pyromaniac","縱火"],["xenophobic","排外"],null],
+[109,17,"admonishing","告誡",["deviating","偏離"],["leveraging","利用"],["procrastinating","拖延"],["upbraiding","責罵"],null],
+[109,18,"rendition","表演",["remuneration","報酬"],["recitation","背誦"],["recession","衰退"],["remission","緩解"],null],
+[109,19,"anthropologist","人類學",["misanthropist","厭世者"],["misogynist","仇女者"],["altruist","利他者"],["alchemist","煉金術士"],null],
+[109,20,"unconscious","無意識",["judicious","明智的"],["salubrious","健康的"],["contiguous","接觸的"],["preposterous","荒謬的"],null],
+[108,1,"impeding","阻礙",["constructing","建造"],["destructing","破壞"],["imposing","強加"],["obstructing","阻礙"],["proposing","提議"]],
+[108,2,"feigning","假裝",["arranging","安排"],["encroaching","侵犯"],["hibernating","冬眠"],["pretending","假裝"],["stimulating","刺激"]],
+[108,3,"admonished","告誡",["disregarded","忽視"],["illuminated","啟發"],["reprimanded","斥責"],["stipulated","規定"],["transcribed","抄寫"]],
+[108,4,"plethora","過剩",["herald","預報"],["prospect","前景"],["surplus","過剩"],["torment","痛苦"],["venture","冒險"]],
+[108,5,"reciprocally","互惠地",["barely","僅僅地"],["mutually","相互地"],["normally","正常地"],["similarly","相似地"],["strongly","強烈地"]],
+[108,6,"covert","隱蔽的",["accustomed","習慣的"],["concealed","隱藏的"],["manifested","表現的"],["prevailed","流行的"],["tangled","糾纏的"]],
+[108,7,"tranquility","寧靜",["activeness","積極"],["agitation","動搖"],["exploration","探險"],["serenity","平靜"],["ubiquity","遍在"]],
+[108,8,"concurrent","同時的",["homogeneous","同質"],["instantaneous","瞬間"],["miscellaneous","雜項"],["simultaneous","同時"],["spontaneous","自發"]],
+[108,9,"heinous","極惡的",["arduous","艱辛的"],["atrocious","殘暴的"],["dolorous","憂傷的"],["laborious","勞累的"],["vigorous","精力旺盛"]],
+[108,10,"altercation","爭吵",["confinement","禁閉"],["connotation","內涵"],["consortium","財團"],["conspiracy","陰謀"],["contretemps","意外"]],
+[108,11,"accusation","控告",["conception","觀念"],["implication","暗示"],["restoration","修復"],["supervision","監督"],null],
+[108,12,"courage","勇氣",["grudge","怨恨"],["nudge","推動"],["plunge","跳入"],["sponge","海綿"],null],
+[108,13,"detection","偵查",["determiner","決定因素"],["detonation","爆炸"],["detriment","損害"],["detritus","岩屑"],null],
+[108,14,"concatenate","連接",["constrict","壓縮"],["contravene","違反"],["convalesce","康復"],["converse","交談"],null],
+[108,15,"commission","委員會",["impairment","損害"],["legislation","立法"],["precaution","預防"],["sentiment","感情"],null],
+[108,16,"dogmatic","教條的",["adiabatic","絕熱的"],["chromatic","彩色的"],["schematic","圖解的"],["somatic","身體的"],null],
+[108,17,"vascular","血管的",["binocular","雙筒的"],["curricular","課程的"],["muscular","肌肉的"],["semicircular","半圓"],null],
+[108,18,"amphibious","水陸兩棲",["curvaceous","曲線美"],["extraneous","無關的"],["judicious","明智的"],["pretentious","矯飾的"],null],
+[108,19,"salient","顯著的",["adjacent","鄰近的"],["patient","耐心的"],["radiant","發光的"],["vacant","空的"],null],
+[108,20,"plagued","困擾的",["pleaded","辯護的"],["pleased","高興的"],["plopped","掉落的"],["plucked","採摘的"],null],
+[107,1,"inexorable","不可阻擋",["understandable","理解"],["unpredictable","難測"],["unprofitable","無益"],["unstoppable","不可阻"],["untraceable","難追"]],
+[107,2,"meager","微薄的",["ample","充足的"],["copious","豐富的"],["onerous","繁重的"],["scanty","不足的"],["tedious","冗長的"]],
+[107,3,"accentuate","強調",["disentangle","解開"],["evacuate","撤離"],["relinquish","放棄"],["subjugate","征服"],["underscore","強調"]],
+[107,4,"sumptuous","奢華的",["avant-garde","前衛的"],["charismatic","魅力的"],["lavish","豪華的"],["radical","激進的"],["tranquil","寧靜的"]],
+[107,5,"mobile","移動的",["moving","移動的"],["contained","包含的"],["motionless","不動的"],["indifferent","冷漠的"],["immaterial","非物質"]],
+[107,6,"indentured","契約的",["bondage","奴役"],["disregard","忽視"],["dominion","主權"],["obstruction","阻礙"],["prestige","威望"]],
+[107,7,"eccentric","古怪的",["accustomed","習慣的"],["conventional","傳統的"],["disymmetric","不對稱"],["idiosyncratic","特立"],["extraverted","外向的"]],
+[107,8,"binary","二元的",["confederacy","聯盟"],["constituency","選區"],["combination","結合"],["commonalty","大眾"],["community","社區"]],
+[107,9,"hamper","阻礙",["cease","停止"],["disguise","偽裝"],["further","進一步"],["impede","阻礙"],["render","提供"]],
+[107,10,"ramifications","後果",["compassions","同情"],["commotions","動亂"],["consequences","後果"],["contretemps","意外"],["consciences","良心"]],
+[107,11,"amicable","友好的",["blatant","明目張膽"],["chivalrous","俠義的"],["luscious","美味的"],["savory","可口的"],null],
+[107,12,"Antagonistic","敵對的",["Composite","合成的"],["Destitute","貧窮的"],["Fictitious","虛構的"],["Gregarious","社交的"],null],
+[107,13,"affirm","斷言",["bustle","喧鬧"],["herald","預報"],["linger","持續"],["syndicate","聯合"],null],
+[107,14,"bulky","龐大的",["defiant","違抗的"],["vertical","垂直的"],["lenient","寬大的"],["sensuous","感官的"],null],
+[107,15,"anomaly","異常",["fiddly","煩瑣的"],["gully","溝渠"],["supply","供應"],["utterly","完全地"],null],
+[107,16,"metaphorical","隱喻的",["beleaguered","困擾的"],["delectable","美味的"],["vigorous","精力充沛"],["transcendent","卓越"],null],
+[107,17,"divulge","洩露",["embellish","修飾"],["impart","傳達"],["proclaim","宣告"],["unravel","闡明"],null],
+[107,18,"captivity","囚禁",["depravity","墮落"],["festivity","慶祝"],["longevity","長壽"],["passivity","被動"],null],
+[107,19,"lodged","投宿",["nudged","推動"],["levied","徵收"],["repelled","擊退"],["maimed","殘廢"],null],
+[107,20,"monotonous","單調的",["combustible","易燃的"],["venomous","有毒的"],["toneless","無聲的"],["versatile","多才多藝"],null],
+[106,1,"repudiated","否認",["approved","贊成"],["assented","同意"],["confirmed","證實"],["spurned","蔑視"],["ratified","批准"]],
+[106,2,"recession","衰退",["stagnation","停滯"],["reflation","再通膨"],["devotion","奉獻"],["emigration","移居"],["inflation","通膨"]],
+[106,3,"atrocious","殘暴的",["destructive","破壞的"],["appalling","恐怖的"],["virtuous","有德行的"],["falling","下降的"],["alluring","誘人的"]],
+[106,4,"prompted","促使",["provoked","激起"],["extinguished","熄滅"],["discouraged","阻礙"],["restrained","克制"],["celebrated","慶祝"]],
+[106,5,"subsidiary","輔助的",["advantageous","有利"],["managing","管理"],["supreme","最高的"],["supplementary","補充"],["dominant","佔優勢"]],
+[106,6,"matrix","起源",["mixture","混合物"],["origin","起源"],["effect","效果"],["custom","習俗"],["adjustment","調整"]],
+[106,7,"monstrous","殘暴的",["glorious","輝煌的"],["magnificent","壯麗"],["gigantic","巨大的"],["outrageous","駭人的"],["miniature","微型的"]],
+[106,8,"erratic","漂忽的",["noticeable","顯著的"],["mercurial","漂忽的"],["constant","恆定的"],["unoriginal","平凡"],["threadbare","陳舊的"]],
+[106,9,"vibrant","充滿活力的",["muffled","壓抑的"],["vigorous","精力充沛"],["inactive","不活躍的"],["sluggish","遲緩的"],["apathetic","冷淡的"]],
+[106,10,"boycott","抵制",["champion","擁護"],["advocate","倡導"],["patronage","贊助"],["repression","壓制"],["protest","抗議"]],
+[106,11,"obsolete","過時的",["navigating","導航的"],["essential","必要的"],["graphic","圖形的"],["sensational","轟動"],null],
+[106,12,"sustainability","永續",["reasonability","合理"],["profitability","盈利"],["achievability","達成"],["attainability","獲得"],null],
+[106,13,"transaction","交易",["redemption","贖回"],["commission","佣金"],["provision","供應"],["replacement","更換"],null],
+[106,14,"dazzled","讚嘆",["deemed","認為"],["abolished","廢除"],["addicted","沈溺"],["obliged","被迫"],null],
+[106,15,"premiered","首映",["predicted","預測"],["preceded","在先的"],["precluded","排除的"],["pre-oriented","預定"],null],
+[106,16,"coterie","小集團",["block","街區"],["form","形式"],["loner","孤獨者"],["barrel","桶"],null],
+[106,17,"allegations","指控",["elongation","伸長"],["allocation","分配"],["deletion","刪除"],["adulation","諂媚"],null],
+[106,18,"exquisite","精美的",["notorious","臭名昭彰"],["qualitative","性質的"],["tedious","冗長的"],["nutritious","營養的"],null],
+[106,19,"profound","深奧的",["frivolous","輕浮的"],["transparent","透明的"],["disturbing","擾人的"],["propitious","吉祥的"],null],
+[106,20,"colluded","勾結",["counseled","諮詢"],["tumbled","跌倒"],["scrambled","爭先"],["disposed","處置"],null],
+[105,1,"tack","做法",["face","臉"],["turn","轉向"],["method","方法"],["nail","釘子"],["choice","選擇"]],
+[105,2,"altitude","高度",["attitude","態度"],["weather","天氣"],["thin air","稀薄空氣"],["cold","寒冷"],["height","高度"]],
+[105,3,"exotic","異國的",["unusual","不尋常"],["beautiful","漂亮的"],["extreme","極端的"],["familiar","熟悉的"],["happy","快樂的"]],
+[105,4,"preoccupying","使全神貫注",["talking","說"],["chatting","聊天"],["engaging","優先投入"],["running","事先運行"],["threatening","威脅"]],
+[105,5,"maxim","格言",["effort","努力"],["proverb","諺語"],["amount","數量"],["huge","巨大的"],["rule","規則"]],
+[105,6,"stiffed","僵硬的",["dull","遲鈍的"],["merchant","商人"],["freely","自由地"],["spectacular","壯觀"],["auto","自動"]],
+[105,7,"phenomenal","非凡的",["smiling","微笑的"],["remarkable","顯著的"],["few","少數的"],["difficult","困難的"],["slow","緩慢的"]],
+[105,8,"overwhelmed","壓倒",["defeated","擊敗"],["covered","覆蓋"],["replaced","取代"],["dominated","支配"],["spilt over","溢出"]],
+[105,9,"altruism","利他主義",["patriotism","愛國"],["alternative","替代"],["happiness","快樂"],["maturity","成熟"],["unselfishness","無私"]],
+[105,10,"scramble","爭相",["struggle","奮鬥"],["order","命令"],["prepare","準備"],["try","嘗試"],["hasten","趕快"]],
+[105,11,"debris","殘骸",["food","食物"],["biology","生物學"],["boats","船"],["animals","動物"],null],
+[105,12,"tournament","錦標賽",["walkout","罷工"],["competition","競爭"],["election","選舉"],["rivalry","競爭"],null],
+[105,13,"alleged","聲稱的",["generated","產生的"],["provoked","挑釁的"],["wonderful","奇妙的"],["rare","罕見的"],null],
+[105,14,"emasculate","閹割",["enmesh","纏住"],["effeminate","柔弱"],["emancipate","解放"],["extinguish","熄滅"],null],
+[105,15,"assimilate","同化",["annihilate","殲滅"],["avow","承認"],["acclaim","喝采"],["acknowledge","承認"],null],
+[105,16,"quest","追求",["question","問題"],["quota","配額"],["dilemma","困境"],["dialogue","對話"],null],
+[105,17,"enhanced","增強的",["enchanted","著迷的"],["uttered","發聲的"],["unleashed","引發的"],["upward","向上的"],null],
+[105,18,"affordable","負擔得起",["moderate","溫和的"],["beating","擊敗"],["alternative","替代"],["tidy","整齊的"],null],
+[105,19,"interim","臨時的",["intern","實習"],["resident","居民"],["permanent","永久的"],["exclusive","排他的"],null],
+[105,20,"elegant","優雅的",["humble","謙虛的"],["ragged","破爛的"],["arrogant","傲慢的"],["ugly","醜陋的"],null],
+[104,1,"accountable","負責任",["accusatory","譴責"],["innocent","無罪的"],["explicable","可解釋"],["resentful","憤恨的"],["psychopathic","患精神病"]],
+[104,2,"surveillance","監視",["slack","鬆弛的"],["cessation","停止"],["discontinuance","中斷"],["termination","終止"],["observation","觀察"]],
+[104,3,"intoxication","中毒",["supercilious","傲慢"],["genetic","遺傳的"],["imprudent","輕率的"],["psychoactive","影響心理"],["addictive","成癮的"]],
+[104,4,"obviates","排除",["precipitates","沈澱"],["precludes","排除"],["precedes","在先"],["predicates","斷定"],["preordains","預定"]],
+[104,5,"contention","爭論",["amity","友好的"],["disagreement","不和"],["cordiality","誠摯"],["discussion","討論"],["accord","一致"]],
+[104,6,"compliant","順從的",["complaint","抱怨"],["compliment","稱讚"],["complementary","互補"],["complement","補足"],null],
+[104,7,"exploitation","開發",["exemplification","舉例"],["exploding","爆炸"],["expansion","擴張"],["expedition","考察"],null],
+[104,8,"purified","純淨的",["disinfected","消毒的"],["obstructed","阻塞的"],["confined","局限的"],["tainted","污染的"],null],
+[104,9,"hostile","敵對的",["humanitarian","人道"],["antagonistic","對抗"],["oblivious","遺忘的"],["indifferent","冷漠的"],null],
+[104,10,"immune","免疫的",["resistant","抵抗的"],["insensitive","不敏的"],["predisposed","傾向的"],["insusceptible","不受影響"],null],
+[104,11,"impermeable","不透的",["tight","緊密的"],["overpassing","越過"],["porous","多孔的"],["inapproachable","難接近"],null],
+[104,12,"reconciled","和解",["conceded","承認"],["retaliated","報復"],["negotiated","談判"],["recapitulated","概括"],null],
+[104,13,"numb","麻木的",["exclusive","獨有的"],["risky","危險的"],["reluctant","勉強的"],["subservient","從屬的"],null],
+[104,14,"intimidating","恐嚇",["alternating","交替的"],["recruiting","招募"],["incorporating","納入"],["juxtaposing","並列"],null],
+[104,15,"synchronization","同步",["endurance","耐力"],["enumeration","列舉"],["vitalization","活化"],["resurgence","復甦"],null],
+[104,16,"thaw","緩和",["tension","緊張"],["conflict","衝突"],["attack","攻擊"],["transaction","交易"],null],
+[104,17,"invigorating","鼓舞",["illuminating","啟蒙"],["inundating","淹沒"],["disseminating","傳播"],["facilitating","促進"],null],
+[104,18,"infiltrate","滲入",["outbreak","爆發"],["summarize","總結"],["undertake","承擔"],["overcome","克服"],null],
+[104,19,"bicameral","兩院制",["bifocal","雙焦點的"],["binomial","二項式的"],["bilateral","雙邊的"],["bipedal","兩足的"],null],
+[104,20,"magnificence","壯麗",["novelty","新奇"],["replicas","複製品"],["commodity","商品"],["amusement","消遣"],null],
+[103,1,"ostentatious","炫耀",["flamboyant","艷麗的"],["insufficient","不足"],["indigent","貧窮的"],["understandable","理解"],["conservative","保守的"]],
+[103,2,"ingenuity","靈巧",["cleverness","聰明的"],["violence","暴力的"],["tranquility","寧靜"],["peace","和平的"],["offense","冒犯的"]],
+[103,3,"delude","欺騙",["confront","面對"],["obscure","模糊的"],["enclose","圍繞"],["beguile","欺騙"],["compete","競爭的"]],
+[103,4,"callously","冷酷地",["forcefully","有力地"],["understandably","理解"],["unfeelingly","無情地"],["affectionately","親愛"],["impartially","公正地"]],
+[103,5,"surreal","超現實的",["cleanness","清潔"],["terror","恐怖的"],["splendor","壯麗"],["duo","雙人的"],["command","命令"]],
+[103,6,"supercilious","傲慢",["primitive","原始的"],["addictive","成癮的"],["languid","疲倦的"],["gallant","英勇的"],null],
+[103,7,"complied","遵從",["defied","挑戰"],["repudiated","拒絕"],["broke","打破"],["refilled","填充"],null],
+[103,8,"imperative","必要的",["genetic","遺傳的"],["faculty","教員"],["desperate","絕望的"],["mortal","凡人的"],null],
+[103,9,"cautious","謹慎的",["irresolute","猶豫的"],["flitching","抽動的"],["intrepid","無畏的"],["imprudent","輕率的"],null],
+[103,10,"lagged","落後",["legged","有腿的"],["leagued","結盟"],["liquored","醉的"],["lingered","逗留"],null],
+[103,11,"self-effacing","謙遜",["self-efficient","自立"],["self-seeking","自私"],["self-enclosed","封閉"],["self-employed","個體"],null],
+[103,12,"recorded","記錄的",["positioned","安置的"],["pressured","加壓的"],["replicated","複製的"],["cozened","欺騙"],null],
+[103,13,"philanthropist","慈善家",["physicist","物理學家"],["physiologist","生理學"],["psychologist","心理學"],["philosopher","哲學家"],null],
+[103,14,"exclusive","獨有的",["contagious","傳染的"],["demanding","苛求的"],["translucent","半透的"],["magnificent","壯麗"],null],
+[103,15,"production","生產",["innovation","創新"],["network","網絡"],["federation","聯邦"],["impediment","阻礙"],null],
+[103,16,"replicas","複製品",["benches","長凳"],["personas","人格"],["authenticities","真實"],["commodities","商品"],null],
+[103,17,"restrained","抑制的",["restated","重申的"],["shunned","避開的"],["cracked","破裂的"],["embedded","嵌入的"],null],
+[103,18,"vantage","優勢",["daredevil","冒險者"],["mount","坐騎"],["recruitment","招募"],["constraint","限制"],null],
+[103,19,"intriguing","迷人的",["monitoring","監控的"],["indulging","沈溺的"],["designating","指定"],["moralizing","說教的"],null],
+[103,20,"amused","愉快的",["injected","注射的"],["amplified","放大的"],["projected","預測的"],["ejected","彈出的"],null],
+[102,1,"perpetrators","加害者",["offenders","犯罪者"],["organizers","組織者"],["administrators","行政"],["fishermen","漁夫"],["founders","創辦者"]],
+[102,2,"collaborative","協作",["joint","共同的"],["positive","積極的"],["elaborate","精緻的"],["separate","分開的"],["consistent","一致的"]],
+[102,3,"hegemony","霸權",["development","發展"],["authenticity","真實"],["supremacy","至高無上"],["validity","有效性"],["epistemology","認識論"]],
+[102,4,"deformity","畸形",["prowess","威力"],["therapy","治療"],["jerks","痙攣"],["decline","下降"],["defect","缺陷"]],
+[102,5,"luxury","奢侈",["accessory","配件"],["extravagance","揮霍"],["option","選項"],["assortment","雜集"],["requirement","要求"]],
+[102,6,"attest to","證明",["opposite to","相反的"],["exchange for","交換"],["testimony to","見證"],["substitute for","代替"],null],
+[102,7,"utopia","烏托邦",["nostalgia","懷舊"],["aphasia","失語症"],["hypochondria","疑病"],["insomnia","失眠"],null],
+[102,8,"disparaged","蔑視",["disdained","鄙視"],["discriminated","歧視"],["discerned","辨別"],["dissipated","驅散"],null],
+[102,9,"ripped off","敲竹槓",["robbed of","搶劫"],["ticked off","惹惱"],["made off","逃跑"],["knocked off","減價"],null],
+[102,10,"doubling","倍增",["dwindling","減少"],["dropping","下降"],["deteriorating","惡化"],["diminishing","縮減"],null],
+[102,11,"intuition","直覺",["analogy","類比"],["anticipation","預期"],["appearance","外觀"],["propensity","傾向"],null],
+[102,12,"ink","墨水",["mileage","里程"],["showcase","櫥窗"],["imprint","印記"],["imagery","意象"],null],
+[102,13,"intimidating","恐嚇",["enhancing","提升"],["inspiring","啟發"],["infringing","侵權"],["neglecting","疏忽"],null],
+[102,14,"submits to","屈服於",["contributes to","貢獻"],["amounts to","總計"],["superior to","優於"],["succumbs to","屈服於"],null],
+[102,15,"consensus","共識",["complex","複雜的"],["consciousness","意識"],["compliment","稱讚"],["conscience","良心"],null],
+[102,16,"sustainable","永續的",["noticeable","明顯的"],["profitable","有利的"],["transferable","轉換"],["rechargeable","充電"],null],
+[102,17,"insights","洞見",["similarities","相似"],["correspondence","通訊"],["assimilation","同化"],["discrepancy","差異"],null],
+[102,18,"conservative","保守的",["contemporary","當代的"],["competitive","競爭"],["combative","好鬥的"],["contingent","視情況"],null],
+[102,19,"permeates","滲透",["permits","允許"],["preserves","保存"],["presumes","假定"],["predicts","預測"],null],
+[102,20,"upheaval","動亂",["animation","動畫"],["onslaught","猛攻"],["exhilaration","興奮"],["slaughter","屠殺"],null],
+[101,1,"covert","秘密的",["emergent","緊急的"],["traumatic","創傷的"],["virile","男子氣概"],["congenial","投緣的"],["secret","秘密的"]],
+[101,2,"speculate","推測",["digress","離題"],["contemplate","深思"],["detract","減損"],["squander","揮霍"],["dissent","異議"]],
+[101,3,"endorse","背書",["comply","服從"],["undermine","破壞"],["approve","批准"],["isolate","隔離"],["encompass","包含"]],
+[101,4,"skeptic","懷疑者",["pessimist","悲觀"],["optimist","樂觀"],["disbeliever","不信者"],["romanticist","浪漫"],["realist","現實主義"]],
+[101,5,"converted","轉變",["banished","驅逐"],["waned","衰退"],["astonished","驚訝"],["clung","堅持"],["transformed","轉化"]],
+[101,6,"challenging","挑戰的",["enabling","使能夠"],["imaginary","想像的"],["modern","現代的"],["phenomenal","驚人的"],null],
+[101,7,"interpretation","詮釋",["transaction","交易"],["stereotype","刻板印象"],["essence","本質"],["query","疑問"],null],
+[101,8,"brightening","變亮",["deadly","致命的"],["glimmering","閃爍的"],["shining","發光的"],["scorching","酷熱的"],null],
+[101,9,"activity","活動",["buzzword","流行語"],["fantasy","幻想"],["pastime","消遣"],["runway","跑道"],null],
+[101,10,"affect","感情",["effect","效果"],["impact","衝擊"],["laughter","笑聲"],["morale","士氣"],null],
+[101,11,"improvised","即興的",["flaunted","誇耀的"],["designated","指定的"],["perused","精讀的"],["hampered","阻礙的"],null],
+[101,12,"assailed","攻擊",["demoralized","消沉"],["tainted","污染的"],["absolved","赦免"],["resolved","解決"],null],
+[101,13,"alluded","暗示",["refuted","反駁"],["coerced","強迫"],["emerged","出現"],["provoked","挑釁"],null],
+[101,14,"assessed","評估",["bestowed","贈與"],["disclosed","揭露"],["surpassed","超過"],["sustained","持續"],null],
+[101,15,"implicit","含蓄的",["imminent","即將的"],["immune","免疫的"],["impair","損害"],["impress","印象"],null],
+[101,16,"accorded","一致的",["conceded","承認失敗"],["receded","後退"],["concocted","編造的"],["interceded","說情"],null],
+[101,17,"compatible","相容的",["complacent","自滿的"],["tangible","具體的"],["capable","有能力的"],["reticent","沉默的"],null],
+[101,18,"genomes","基因組",["microbes","微生物"],["genes","基因"],["pathogens","病原體"],["organisms","生物"],null],
+[101,19,"nutshell","簡而言之",["significance","意義"],["outcome","結果"],["resource","資源"],["choice","選擇"],null],
+[101,20,"isolation","隔離",["interrogation","審問"],["migration","遷移"],["persuasion","說服"],["integration","整合"],null],
+[100,1,"intervene","干預",["regulate","管理"],["interfere","干涉"],["appreciate","感激"],["appraise","評估"],["verify","證實"]],
+[100,2,"bizarre","奇特的",["ethnic","種族的"],["original","原始的"],["successive","連續的"],["peculiar","古怪的"],["natural","自然的"]],
+[100,3,"coercion","強迫",["compulsion","強制性"],["acknowledgement","承認"],["suspension","中止"],["encouragement","鼓勵"],["curiosity","好奇"]],
+[100,4,"apprehension","憂慮",["destination","目的地"],["neutrality","中立"],["comprehension","理解"],["despair","絕望"],["misgivings","疑慮"]],
+[100,5,"gullible","易受騙",["naïve","天真的"],["crisp","脆的"],["credible","可信的"],["competent","有能力的"],["plausible","合理的"]],
+[100,6,"terminate","終止",["obfuscate","模糊"],["promote","促進"],["expedite","加速"],["fatigue","疲勞"],null],
+[100,7,"affordable","負擔得起",["enormous","巨大的"],["inefficient","無效率"],["disappointed","失望"],["pragmatic","務實的"],null],
+[100,8,"hospitality","款待",["connivance","縱容"],["flirtation","調情"],["concinnity","和諧"],["concierge","門房"],null],
+[100,9,"arrested","逮捕",["interrogated","審問"],["speculated","推測"],["slain","殺害"],["persecuted","迫害"],null],
+[100,10,"variable","變數",["alternative","替代的"],["integration","整合"],["hesitation","猶豫"],["constraint","限制"],null],
+[100,11,"Amnesty","大赦",["Tenure","任期"],["Temerity","魯莽"],["Alternative","替代"],["Punctuation","標點"],null],
+[100,12,"confiscated","沒收",["replenished","補充"],["perused","精讀"],["isolated","隔離"],["demanded","要求"],null],
+[100,13,"perennial","長年",["uncivilized","不文明"],["inanimate","無生命"],["miscellaneous","雜項"],["lasting","持久的"],null],
+[100,14,"resistant","抵抗的",["insistent","堅持的"],["competitive","競爭"],["dominant","優勢的"],["subsistent","生存的"],null],
+[100,15,"revolving","旋轉的",["involving","涉及的"],["evolving","演變的"],["resolving","解決的"],["devolving","移交的"],null],
+[100,16,"aesthetic","美學的",["associative","聯想的"],["referent","指稱物"],["lexical","詞彙的"],["analogical","類推的"],null],
+[100,17,"in the long run","長期",["for the time being","暫時"],["once in a blue moon","難得一次"],["more often than not","通常"],["in no time","立即"],null],
+[100,18,"Experienced","資深的",["Engaged","忙碌的"],["Eligible","合格的"],["Empirical","經驗的"],["Elevated","抬高的"],null],
+[100,19,"malfunction","故障",["miscarriage","流產"],["misconduct","不當行為"],["discharge","排放"],["disorientation","迷失"],null],
+[100,20,"principle","原則",["principal","主要的"],["pragmatic","務實的"],["primitive","原始的"],["prompt","迅速的"],null],
+[98,1,"profoundly","深切地",["persistently","持續地"],["practically","實際上"],["permanently","永久地"],["predominantly","主要地"],null],
+[98,2,"interval","間隔",["range","範圍"],["span","跨度"],["term","期限"],["rank","等級"],null],
+[98,3,"restrain","抑制",["hinder","阻礙"],["restrict","限制"],["prohibit","禁止"],["control","控制"],null],
+[98,4,"take into account","考慮",["take a fancy of","喜歡"],["take a grip on","緊握"],["take in hand","處理"],["take task to","責難"],null],
+[98,5,"arbitrary","武斷的",["rational","理性的"],["mechanical","機械的"],["unpredictable","難測"],["sensible","明智的"],null],
+[98,6,"straightforward","直接",["self-deceptive","自欺"],["segmentalizing","分割"],["stradivarius","名琴"],["subterraneous","地下"],null],
+[98,7,"hanker","渴望",["harass","騷擾"],["haunt","纏擾"],["heal","治癒"],["hunt","狩獵"],null],
+[98,8,"on a par with","同等",["below par","低於標準"],["up to par","達到標準"],["as par","作為標準"],["par value","票面價值"],null],
+[98,9,"accessible","可接近的",["admitted","准許進入"],["advisable","明智的"],["apt to","傾向於"],["available","可得的"],null],
+[98,10,"amendments","修正",["adjustments","調整"],["improvements","改進"],["predicaments","困境"],["rudiments","基礎"],null],
+[98,11,"cater","迎合",["unwind","放鬆"],["grip","抓緊"],["conform","遵守"],["induce","誘導"],null],
+[98,12,"Demographic","人口統計",["Monographic","專題"],["Geographic","地理的"],["Seismographic","地震儀"],["Bibliographic","書目"],null],
+[98,13,"ambivalence","矛盾",["fear","恐懼"],["irritation","激怒"],["ambiguity","模稜兩可"],["a feat","功績"],null],
+[98,14,"disseminate","傳播",["enhance","增強"],["impeach","彈劾"],["interrogate","審問"],["stake","賭注"],null],
+[98,15,"incentives","誘因",["internships","實習"],["habitat","棲息地"],["lectures","講座"],["censure","責難"],null],
+[98,16,"panacea","萬靈丹",["panorama","全景"],["premise","前提"],["perseverance","毅力"],["prospectus","企劃"],null],
+[98,17,"impeccable","完美的",["putative","公認的"],["specious","似是而非"],["moribund","垂死的"],["ephemeral","短暫的"],null],
+[98,18,"breach","違反",["avoidance","避免"],["cause","原因"],["evidence","證據"],["manner","方式"],null],
+[98,19,"concomitant","伴隨的",["taciturn","沉默的"],["equivocal","模糊的"],["empirical","經驗的"],["ingenuous","天真的"],null],
+[98,20,"deviate from","偏離",["overlap with","重疊"],["concur with","同意"],["are distorted","扭曲"],["deduce","推論"],null]
+];
+
+let items = [];
+DATA.forEach(row => {
+  const [yr, qn, uen, uzh, ...opts] = row;
+  const label = yr + '年 第' + qn + '題';
+  items.push({year: yr, qNum: qn, en: uen, zh: uzh, qLabel: label, role: 'underlined'});
+  opts.forEach((opt, i) => {
+    if (opt && opt[0]) {
+      items.push({year: yr, qNum: qn, en: opt[0], zh: opt[1], qLabel: label, role: 'option' + String.fromCharCode(65+i)});
+    }
+  });
+});
+
+let filtered = [];
+let idx = 0;
+let playing = false;
+let pauseSec = 1.5;
+let speakRate = 0.85;
+let timer = null;
+
+function buildList() {
+  const yr = document.getElementById('year-filter').value;
+  filtered = items.filter(it => yr === 'all' || String(it.year) === yr);
+  if (document.getElementById('shuffle-chk').checked) {
+    let qs = [], cur = null, grp = [];
+    filtered.forEach(it => {
+      const k = it.year + '-' + it.qNum;
+      if (!cur || cur !== k) { if (grp.length) qs.push(grp); grp = [it]; cur = k; }
+      else grp.push(it);
+    });
+    if (grp.length) qs.push(grp);
+    for (let i = qs.length-1; i>0; i--) { const j = Math.floor(Math.random()*(i+1)); [qs[i],qs[j]]=[qs[j],qs[i]]; }
+    filtered = qs.flat();
+  }
+  idx = 0;
+  document.getElementById('status').textContent = '共 ' + filtered.length + ' 個單字（' + Math.round(filtered.length/6) + ' 題）';
+}
+
+function roleLabel(role) {
+  if (role === 'underlined') return '題目';
+  return '選項 ' + role.replace('option','');
+}
+
+function showWord() {
+  if (!filtered.length) return;
+  const w = filtered[idx];
+  document.getElementById('year-badge').textContent = w.qLabel + ' — ' + roleLabel(w.role);
+  document.getElementById('word-en').textContent = w.en;
+  document.getElementById('word-zh').textContent = w.zh;
+  document.getElementById('word-num').textContent = (idx+1) + ' / ' + filtered.length;
+  const pct = filtered.length > 1 ? Math.round(idx/(filtered.length-1)*100) : 100;
+  document.getElementById('progress-bar').style.width = pct + '%';
+  const sameQ = filtered.filter(it => it.year === w.year && it.qNum === w.qNum);
+  const row = document.getElementById('opts-row');
+  row.innerHTML = '';
+  sameQ.forEach(it => {
+    const chip = document.createElement('span');
+    chip.className = 'opt-chip' + (it === w ? ' active' : '');
+    chip.textContent = it.en;
+    row.appendChild(chip);
+  });
+}
+
+function speakCurrent(cb) {
+  if (!filtered.length) return;
+  const w = filtered[idx];
+  window.speechSynthesis.cancel();
+  const u1 = new SpeechSynthesisUtterance(w.en);
+  u1.lang = 'en-US'; u1.rate = speakRate;
+  const u2 = new SpeechSynthesisUtterance(w.zh);
+  u2.lang = 'zh-TW'; u2.rate = 0.9;
+  window.speechSynthesis.speak(u1);
+  u1.onend = () => {
+    timer = setTimeout(() => {
+      window.speechSynthesis.speak(u2);
+      u2.onend = () => { if (cb) timer = setTimeout(cb, pauseSec * 1000); };
+    }, 250);
+  };
+}
+
+function playNext() {
+  if (!playing) return;
+  if (idx < filtered.length - 1) { idx++; showWord(); speakCurrent(playNext); }
+  else { playing = false; document.getElementById('btn-play').textContent = '播放'; }
+}
+
+function togglePlay() {
+  if (!filtered.length) return;
+  playing = !playing;
+  document.getElementById('btn-play').textContent = playing ? '暫停' : '播放';
+  if (playing) speakCurrent(playNext);
+  else { window.speechSynthesis.cancel(); clearTimeout(timer); }
+}
+
+function prevItem() { stopPlay(); if (idx > 0) { idx--; showWord(); } }
+function nextItem() { stopPlay(); if (idx < filtered.length-1) { idx++; showWord(); } }
+function stopPlay() {
+  if (playing) { playing = false; window.speechSynthesis.cancel(); clearTimeout(timer); document.getElementById('btn-play').textContent = '播放'; }
+}
+function applyFilter() { stopPlay(); buildList(); showWord(); }
+function updateRate() { speakRate = parseFloat(document.getElementById('rate-slider').value); document.getElementById('rate-val').textContent = speakRate.toFixed(1) + 'x'; }
+function updatePause() { pauseSec = parseFloat(document.getElementById('pause-slider').value); document.getElementById('pause-val').textContent = pauseSec.toFixed(1) + '秒'; }
+
+buildList(); showWord();
+</script>
+</body>
+</html>
