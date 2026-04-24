@@ -1,108 +1,143 @@
-# 跑步單字練習 (Running Vocabulary Practice)
+# 高醫英文單字練習系統
 
-An interactive web application for practicing English vocabulary from Taiwan's university entrance exams (大學學測).
+## 概述
 
-## Features
+這是一個功能完整的英文單字學習應用程式，專為高醫入學考試設計。應用包含2700+個精選英文單字及其中文解釋，跨越18年的考試試題（98-115年）。
 
-### 📚 Comprehensive Vocabulary Database
-- **3000+ vocabulary words** from exam years 98-115
-- Sourced from actual examination questions across multiple years
-- Each entry includes English word and Chinese meaning
+**核心功能：**
+- **練習模式**：逐題學習每個單字及其選項，支援美式英文發音播放
+- **測驗模式**：隨機抽題進行快速測驗，自動評分且支援實時進度追蹤
+- **客製化設定**：調整朗讀速度、播放間隔、年份篩選、隨機順序、測驗自動跳題延遲
+- **響應式設計**：採用現代漸層紫色主題，流暢動畫效果，優雅的卡片設計
+- **智慧播放**：整合Web Speech API，支援連續播放或逐題播放
 
-### 🎙️ Audio Support
-- **Full pronunciation** for all vocabulary entries
-- Bilingual audio: English (US accent) and Traditional Chinese (Taiwan accent)
-- Adjustable playback speed (0.5x - 1.5x)
-- Configurable pause interval between words (0.5s - 5s)
+應用不需後端支援，完全在瀏覽器端執行，資料內嵌於HTML中。適合自主學習或考前突擊準備。
 
-### 📊 Learning Tools
-- **Year-based filtering**: Study specific exam years or all years
-- **Shuffle mode**: Randomize question order for better retention
-- **Progress tracking**: Visual progress bar and word counter
-- **Question context**: View all options for each exam question
-- **Navigation controls**: Move between words easily
+---
 
-### 🎯 Exam-Focused
-- All vocabulary organized by exam question
-- Option cards show context of multiple-choice answers
-- Question numbering matches actual exam format
+## 系統架構
 
-## Usage
-
-### Basic Controls
-- **Previous/Next**: Navigate between vocabulary words
-- **Play**: Start automatic playback with audio pronunciation
-- **Settings Panel**: Adjust year filter, speed, pause time, and shuffle mode
-
-### Settings
-| Setting | Range | Default |
-|---------|-------|---------|
-| Year Filter | All or specific years | All |
-| Speech Rate | 0.5x - 1.5x | 0.85x |
-| Pause Interval | 0.5s - 5s | 1.5s |
-| Shuffle | On/Off | Off |
-
-## Data Structure
-
-Each vocabulary entry contains:
-- **Year**: Exam year (e.g., 115)
-- **Question Number**: Question ID (1-20)
-- **English Word**: The vocabulary term
-- **Chinese Translation**: Traditional Chinese meaning
-- **Options**: Related words/synonyms from the exam question
-
-Example:
 ```
-[115, 1, "quashed", "推翻/撤銷", ["cosseted", "寵愛"], ["negotiated", "談判"], ...]
+┌─────────────────────────────────────────────────────────┐
+│                    Vocabulary Runner                     │
+│                  (vocabulary_runner.html)                │
+└─────────────────────────────────────────────────────────┘
+                              │
+                ┌─────────────┼─────────────┐
+                │             │             │
+         ┌──────▼──────┐  ┌───▼────┐  ┌────▼─────┐
+         │   UI Layer  │  │ Data   │  │  Logic   │
+         │  (HTML/CSS) │  │ Layer  │  │  Layer   │
+         └──────┬──────┘  └───┬────┘  └────┬─────┘
+                │             │            │
+        ┌───────┴───────┐     │      ┌─────┴──────┐
+        │               │     │      │            │
+    ┌───▼────┐  ┌──────▼───┐ │  ┌──▼─────┐  ┌──▼──────┐
+    │ Header │  │   Card   │ │  │Practice│  │  Quiz   │
+    │ Mode   │  │Container │ │  │Engine  │  │ Engine  │
+    │Buttons │  └─────┬────┘ │  └────────┘  └─────────┘
+    └────────┘        │      │
+                  ┌───┴──┬──┴────────────┐
+                  │      │               │
+            ┌─────▼──┐ ┌─▼────────┐  ┌──▼──────┐
+            │Display │ │Controls  │  │Settings │
+            │Region  │ │(Play)    │  │(Sliders)│
+            └────────┘ └──────────┘  └─────────┘
+                  │
+                  ▼
+    ┌──────────────────────────────┐
+    │   Built-in DATA Array        │
+    │  (2700+ Words: 98-115年)     │
+    │  Structure: [year, qNum,     │
+    │   English, Chinese, Options] │
+    └──────────────────────────────┘
+                  │
+                  ├─► Items Array (Practice Mode)
+                  └─► QuestionData Array (Quiz Mode)
+                       │
+                       ▼
+        ┌─────────────────────────────┐
+        │   State Management          │
+        │ (idx, mode, playState,      │
+        │  quizScore, settings)       │
+        │                             │
+        │ • currentMode               │
+        │ • filtered (active items)   │
+        │ • answered (quiz lock)      │
+        │ • speakRate, pauseSec,      │
+        │   quizDelay                 │
+        └─────────────────────────────┘
+                  │
+                  ▼
+        ┌─────────────────────────────┐
+        │   Web Speech API            │
+        │  (Text-to-Speech)           │
+        │  EN-US & ZH-TW              │
+        └─────────────────────────────┘
+
+
+核心流程：
+
+┌──────────────────────────────────────────────────────────────┐
+│  1. 初始化             2. 選擇模式        3. 設定篩選       │
+│  ├─ 載入DATA      ├─ Practice Mode    ├─ 年份範圍     │
+│  ├─ 建立Items    └─ Quiz Mode         ├─ 播放速度     │
+│  └─ 建立Questions       │              ├─ 間隔時間     │
+│         │               │              └─ 自動延遲     │
+│         └───────────────┴────────┬──────────────────┘
+│                                  │
+│                          ┌───────▼────────┐
+│                          │  Show Word     │
+│                          │  Display Info  │
+│                          │  Render UI     │
+│                          └───────┬────────┘
+│                                  │
+│         ┌────────────────────────┼────────────────────┐
+│         │                        │                    │
+│    ┌────▼─────┐          ┌──────▼──────┐    ┌───────▼─────┐
+│    │ Practice │          │Quiz Answer  │    │ Auto-Play   │
+│    │Mode:     │          │Check:       │    │Feature:     │
+│    │- Play    │          │- Correct    │    │- Play EN    │
+│    │- Browse  │          │- Wrong      │    │- Pause      │
+│    │- View    │          │- Score      │    │- Play ZH    │
+│    │- Prev/   │          │- Auto Next  │    │- Next Item  │
+│    │  Next    │          │  (1s delay) │    │- Loop Mode  │
+│    └──────────┘          └─────────────┘    └─────────────┘
+│
+└──────────────────────────────────────────────────────────────┘
 ```
 
-## Technical Details
+---
 
-### Technologies
-- **HTML5**: Semantic markup and structure
-- **CSS3**: Modern styling with glassmorphism design
-- **Vanilla JavaScript**: No external dependencies
-- **Web Speech API**: Native browser text-to-speech
+## 技術棧
 
-### Browser Compatibility
-- Requires modern browser with Web Speech API support
-- Tested on Chrome, Safari, Edge
+- **前端**: HTML5, CSS3 (Gradient, Flexbox), Vanilla JavaScript (ES6+)
+- **音頻**: Web Speech API (支援英文與繁體中文)
+- **資料結構**: 嵌入式陣列 (JSON-like array in JavaScript)
+- **存儲**: 瀏覽器本地 (無後端依賴)
 
-### File Size
-- Single HTML file (self-contained)
-- ~564 lines including 3000+ vocabulary entries
+## 主要特性
 
-## Design Highlights
+| 功能 | 說明 |
+|------|------|
+| 雙模式 | 練習模式逐題學習，測驗模式快速檢驗 |
+| 聲音播放 | 美式英文發音，支援調速 (0.5x - 1.5x) |
+| 自動跳題 | 測驗模式答對後自動進入下題 (0.5-3秒可調) |
+| 年份篩選 | 按考試年度快速篩選單字 |
+| 隨機模式 | 支援打亂順序複習 |
+| 實時計分 | 測驗模式即時顯示正確率百分比 |
+| 響應式設計 | 現代漸層紫色主題，流暢動畫 |
 
-- **Glassmorphism UI**: Modern frosted glass effect with animated background orbs
-- **Responsive Design**: Works on desktop and mobile devices
-- **Dark Theme**: Easy on the eyes with gradient backgrounds
-- **Smooth Animations**: Floating background elements and transitions
+## 使用方式
 
-## Installation
+1. **選擇模式**: 點擊「練習模式」或「測驗模式」
+2. **篩選設定**: 選擇年份、調整播放速度和間隔
+3. **練習模式**: 使用「播放」播放發音，「上/下一個」瀏覽單字
+4. **測驗模式**: 選擇中文選項對應英文單字，系統自動計分
 
-No installation required! Simply:
-1. Save `vocabulary_runner_full.html` locally
-2. Open in any modern web browser
-3. Start practicing!
+## 安裝與執行
 
-## Tips for Effective Learning
-
-1. **Consistent Practice**: Study 20-30 words per session
-2. **Audio Learning**: Use audio playback to improve pronunciation
-3. **Shuffle Mode**: Enable shuffle after learning to test retention
-4. **Year-by-Year**: Start with recent years, then progress backward
-5. **Multiple Runs**: Review difficult words repeatedly
-
-## Future Enhancements
-
-- [ ] Offline support with Service Worker
-- [ ] User progress tracking and statistics
-- [ ] Custom vocabulary lists
-- [ ] Flashcard mode
-- [ ] Quiz functionality with scoring
-- [ ] Save/bookmark favorite words
-- [ ] Mobile app version
+無需安裝！直接在瀏覽器開啟 `vocabulary_runner_full.html` 即可使用。
 
 ## License
 

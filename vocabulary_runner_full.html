@@ -3,62 +3,314 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>跑步單字練習</title>
+<title>單字練習</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f5; min-height: 100vh; padding: 1rem; }
-#app { max-width: 480px; margin: 0 auto; padding: 1rem 0; }
-.header { text-align: center; margin-bottom: 1.25rem; }
-.header h1 { font-size: 20px; font-weight: 500; color: #1a1a1a; }
-.header p { font-size: 13px; color: #888; margin-top: 4px; }
-.card { background: #fff; border: 0.5px solid #e0e0e0; border-radius: 12px; padding: 1.25rem; margin-bottom: 12px; }
-.word-display { text-align: center; padding: 1rem 1rem 1.25rem; }
-.year-badge { display: inline-block; font-size: 11px; font-weight: 500; background: #e8f0fe; color: #1a73e8; padding: 3px 10px; border-radius: 8px; margin-bottom: 10px; }
-.word-en { font-size: 28px; font-weight: 500; color: #1a1a1a; margin-bottom: 5px; letter-spacing: -0.5px; }
-.word-zh { font-size: 15px; color: #555; margin-bottom: 8px; }
-.options-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; margin-top: 8px; }
-.opt-chip { font-size: 11px; padding: 2px 8px; border-radius: 20px; background: #f0f0f0; color: #999; border: 0.5px solid #e0e0e0; }
-.opt-chip.active { background: #e8f0fe; color: #1a73e8; border-color: transparent; font-weight: 500; }
-.word-num { font-size: 12px; color: #bbb; margin-top: 10px; }
-.progress-bar-wrap { background: #f0f0f0; border-radius: 4px; height: 4px; margin-bottom: 1rem; overflow: hidden; }
-.progress-bar { height: 4px; background: #378ADD; border-radius: 4px; transition: width 0.3s; }
-.controls { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 4px; }
-.btn { border: 0.5px solid #ccc; background: transparent; color: #333; border-radius: 8px; padding: 8px 14px; font-size: 14px; cursor: pointer; font-family: inherit; transition: background 0.15s; }
-.btn:hover { background: #f5f5f5; }
-.btn:active { transform: scale(0.97); }
-.btn-play { background: #e8f0fe; color: #1a73e8; border: none; padding: 10px 28px; font-size: 15px; font-weight: 500; }
-.btn-play:hover { opacity: 0.85; }
-.settings { border-top: 0.5px solid #eee; padding-top: 12px; }
-.setting-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; font-size: 13px; color: #888; }
-.setting-row label { flex: 0 0 60px; }
-.setting-row input[type=range] { flex: 1; }
-.setting-row span { font-size: 13px; color: #333; min-width: 36px; text-align: right; }
-.status { text-align: center; font-size: 12px; color: #bbb; margin-top: 8px; }
-select { border: 0.5px solid #ccc; border-radius: 8px; background: #fff; color: #333; font-size: 13px; padding: 4px 8px; font-family: inherit; }
+body { 
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft JhengHei', sans-serif; 
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh; 
+  padding: 2rem 1rem; 
+}
+#app { max-width: 520px; margin: 0 auto; }
+.header { 
+  text-align: center; 
+  margin-bottom: 2rem; 
+  padding: 1.5rem;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+.header h1 { 
+  font-size: 22px; 
+  font-weight: 600; 
+  color: #2d3748; 
+  margin-bottom: 12px;
+}
+.header p { font-size: 13px; color: #718096; margin-top: 4px; }
+.card { 
+  background: rgba(255, 255, 255, 0.98); 
+  border: none;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+  border-radius: 16px; 
+  padding: 1.75rem; 
+  margin-bottom: 16px; 
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+}
+.quiz-options { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
+.quiz-option-btn { 
+  padding: 12px 16px; 
+  border: 2px solid #e2e8f0; 
+  border-radius: 10px; 
+  background: #fff; 
+  text-align: left; 
+  cursor: pointer; 
+  font-size: 15px; 
+  font-weight: 500;
+  color: #4a5568;
+  transition: all 0.2s;
+}
+.quiz-option-btn:hover { 
+  background: #f7fafc; 
+  border-color: #cbd5e0;
+  transform: translateX(4px);
+}
+.quiz-option-btn.correct { 
+  background: #c6f6d5; 
+  border-color: #48bb78; 
+  color: #22543d; 
+}
+.quiz-option-btn.wrong { 
+  background: #fed7d7; 
+  border-color: #f56565; 
+  color: #742a2a; 
+}
+.quiz-feedback { 
+  text-align: center; 
+  margin-top: 12px; 
+  font-size: 15px; 
+  font-weight: 600; 
+  min-height: 24px; 
+  padding: 8px 16px;
+  border-radius: 8px;
+}
+.quiz-feedback.correct { 
+  color: #22543d;
+  background: #c6f6d5;
+}
+.quiz-feedback.wrong { 
+  color: #742a2a;
+  background: #fed7d7;
+}
+.word-display { text-align: center; padding: 0.5rem 0.5rem 1rem; }
+.year-badge { 
+  display: inline-block; 
+  font-size: 12px; 
+  font-weight: 600; 
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff; 
+  padding: 6px 14px; 
+  border-radius: 20px; 
+  margin-bottom: 16px;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+.word-en { 
+  font-size: 32px; 
+  font-weight: 700; 
+  color: #2d3748; 
+  margin-bottom: 8px; 
+  letter-spacing: -0.5px; 
+}
+.word-zh { 
+  font-size: 16px; 
+  color: #4a5568; 
+  margin-bottom: 12px;
+  font-weight: 500;
+}
+.options-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin-top: 12px; }
+.opt-chip { 
+  font-size: 12px; 
+  padding: 4px 12px; 
+  border-radius: 16px; 
+  background: #edf2f7; 
+  color: #718096; 
+  border: 1px solid #e2e8f0;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+.opt-chip.active { 
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff; 
+  border-color: transparent; 
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+.word-num { 
+  font-size: 13px; 
+  color: #a0aec0; 
+  margin-top: 12px;
+  font-weight: 500;
+}
+.progress-bar-wrap { 
+  background: #edf2f7; 
+  border-radius: 8px; 
+  height: 6px; 
+  margin-bottom: 1.25rem; 
+  overflow: hidden; 
+}
+.progress-bar { 
+  height: 6px; 
+  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+  border-radius: 8px; 
+  transition: width 0.4s ease; 
+}
+.controls { 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  gap: 12px; 
+  margin-bottom: 8px; 
+}
+.btn { 
+  border: none; 
+  background: #edf2f7; 
+  color: #4a5568; 
+  border-radius: 10px; 
+  padding: 10px 18px; 
+  font-size: 14px; 
+  font-weight: 600;
+  cursor: pointer; 
+  font-family: inherit; 
+  transition: all 0.2s; 
+}
+.btn:hover { 
+  background: #e2e8f0;
+  transform: translateY(-1px);
+}
+.btn:active { 
+  transform: scale(0.96); 
+}
+.btn-play { 
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff; 
+  border: none; 
+  padding: 12px 32px; 
+  font-size: 15px; 
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+.btn-play:hover { 
+  opacity: 0.9;
+  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.5);
+}
+.settings { 
+  border-top: 1px solid #e2e8f0; 
+  padding-top: 16px; 
+  margin-top: 8px;
+}
+.settings > div:first-child {
+  font-size: 14px;
+  font-weight: 600;
+  color: #2d3748;
+  margin-bottom: 12px;
+}
+.setting-row { 
+  display: flex; 
+  align-items: center; 
+  gap: 12px; 
+  margin-bottom: 12px; 
+  font-size: 14px; 
+  color: #718096; 
+}
+.setting-row label { 
+  flex: 0 0 70px; 
+  font-weight: 500;
+  color: #4a5568;
+}
+.setting-row input[type=range] { 
+  flex: 1; 
+  height: 6px;
+  border-radius: 3px;
+  background: #e2e8f0;
+  appearance: none;
+  cursor: pointer;
+}
+.setting-row input[type=range]::-webkit-slider-thumb {
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(102, 126, 234, 0.4);
+}
+.setting-row span { 
+  font-size: 14px; 
+  color: #2d3748; 
+  min-width: 50px; 
+  text-align: right; 
+  font-weight: 600;
+}
+.status { 
+  text-align: center; 
+  font-size: 13px; 
+  color: #fff; 
+  margin-top: 12px; 
+  font-weight: 500;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+select { 
+  border: 1px solid #e2e8f0; 
+  border-radius: 8px; 
+  background: #fff; 
+  color: #2d3748; 
+  font-size: 14px; 
+  padding: 6px 12px; 
+  font-family: inherit; 
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+select:hover {
+  border-color: #cbd5e0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+input[type=checkbox] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: #667eea;
+}
+#setting-quiz-delay {
+  display: none;
+}
+.mode-buttons {
+  margin-top: 12px;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+.btn-mode {
+  font-size: 14px;
+  padding: 8px 16px;
+}
 </style>
 </head>
 <body>
 <div id="app">
   <div class="header">
-    <h1>跑步單字練習</h1>
-    <p>大學學測英文單字 — 全選項美式發音</p>
+    <h1>高醫英文單字 — 全選項美式發音</h1>
+    <div class="mode-buttons">
+      <button class="btn btn-mode" id="mode-practice" onclick="switchMode('practice')">練習模式</button>
+      <button class="btn btn-mode" id="mode-quiz" onclick="switchMode('quiz')">測驗模式</button>
+    </div>
   </div>
 
-  <div class="card">
+  <div class="card" id="word-card">
     <div class="word-display">
-      <div class="year-badge" id="year-badge">114年 第1題</div>
+      <div class="year-badge" id="year-badge">114 年 第 1 題</div>
       <div class="word-en" id="word-en">—</div>
       <div class="word-zh" id="word-zh">—</div>
       <div class="options-row" id="opts-row"></div>
+      <div class="quiz-options" id="quiz-opts" style="display:none;"></div>
+      <div class="quiz-feedback" id="quiz-feedback"></div>
       <div class="word-num" id="word-num">— / —</div>
     </div>
     <div class="progress-bar-wrap">
       <div class="progress-bar" id="progress-bar" style="width:0%"></div>
     </div>
-    <div class="controls">
+    <div class="controls" id="practice-controls">
       <button class="btn" onclick="prevItem()">上一個</button>
       <button class="btn btn-play" id="btn-play" onclick="togglePlay()">播放</button>
       <button class="btn" onclick="nextItem()">下一個</button>
+    </div>
+    <div class="controls" id="quiz-controls" style="display:none;margin-top:8px;">
+      <button class="btn" onclick="prevItem()" style="flex:1">上一題</button>
+      <button class="btn" onclick="nextItem()" style="flex:1">下一題</button>
     </div>
   </div>
 
@@ -87,18 +339,23 @@ select { border: 0.5px solid #ccc; border-radius: 8px; background: #fff; color: 
         <option value="98">98年</option>
       </select>
     </div>
-    <div class="setting-row">
+    <div class="setting-row" id="setting-rate">
       <label>朗讀速度</label>
       <input type="range" id="rate-slider" min="0.5" max="1.5" step="0.1" value="0.85" oninput="updateRate()">
       <span id="rate-val">0.9x</span>
     </div>
-    <div class="setting-row">
+    <div class="setting-row" id="setting-pause">
       <label>間隔時間</label>
       <input type="range" id="pause-slider" min="0.5" max="5" step="0.5" value="1.5" oninput="updatePause()">
-      <span id="pause-val">1.5秒</span>
+      <span id="pause-val">1.5 秒</span>
+    </div>
+    <div class="setting-row" id="setting-quiz-delay">
+      <label>測驗延遲</label>
+      <input type="range" id="quiz-delay-slider" min="0.5" max="3" step="0.5" value="1" oninput="updateQuizDelay()">
+      <span id="quiz-delay-val">1 秒</span>
     </div>
     <div class="setting-row">
-      <label>隨機播放</label>
+      <label>隨機</label>
       <input type="checkbox" id="shuffle-chk" onchange="applyFilter()">
     </div>
   </div>
@@ -450,13 +707,44 @@ const DATA = [
 ];
 
 let items = [];
-DATA.forEach(row => {
+DATA.forEach((row) => {
   const [yr, qn, uen, uzh, ...opts] = row;
-  const label = yr + '年 第' + qn + '題';
-  items.push({year: yr, qNum: qn, en: uen, zh: uzh, qLabel: label, role: 'underlined'});
+  const label = `${yr}年 第${qn}題`;
+  items.push({ year: yr, qNum: qn, en: uen, zh: uzh, qLabel: label, role: 'underlined' });
   opts.forEach((opt, i) => {
     if (opt && opt[0]) {
-      items.push({year: yr, qNum: qn, en: opt[0], zh: opt[1], qLabel: label, role: 'option' + String.fromCharCode(65+i)});
+      items.push({ year: yr, qNum: qn, en: opt[0], zh: opt[1], qLabel: label, role: `option${String.fromCharCode(65 + i)}` });
+    }
+  });
+});
+
+// 提取所有英文單字作為測驗題目（包括題目和選項）
+let questionData = [];
+DATA.forEach((row) => {
+  const [yr, qn, uen, uzh, ...opts] = row;
+  const label = `${yr}年 第${qn}題`;
+  
+  // 加入題目單字
+  questionData.push({
+    year: yr,
+    qNum: qn,
+    en: uen,
+    zh: uzh,
+    qLabel: label,
+    source: 'question'
+  });
+  
+  // 加入選項單字（如果有）
+  opts.forEach((opt, i) => {
+    if (opt && opt[0]) {
+      questionData.push({
+        year: yr,
+        qNum: qn,
+        en: opt[0],
+        zh: opt[1],
+        qLabel: label,
+        source: `option${String.fromCharCode(65 + i)}`
+      });
     }
   });
 });
@@ -466,49 +754,228 @@ let idx = 0;
 let playing = false;
 let pauseSec = 1.5;
 let speakRate = 0.85;
+let quizDelay = 1; // 測驗模式自動跳題延遲秒數
 let timer = null;
+let currentMode = 'practice'; // 'practice' 或 'quiz'
+let quizScore = { correct: 0, wrong: 0 };
+let answered = false; // 是否已答題
 
 function buildList() {
   const yr = document.getElementById('year-filter').value;
-  filtered = items.filter(it => yr === 'all' || String(it.year) === yr);
-  if (document.getElementById('shuffle-chk').checked) {
-    let qs = [], cur = null, grp = [];
-    filtered.forEach(it => {
-      const k = it.year + '-' + it.qNum;
-      if (!cur || cur !== k) { if (grp.length) qs.push(grp); grp = [it]; cur = k; }
-      else grp.push(it);
-    });
-    if (grp.length) qs.push(grp);
-    for (let i = qs.length-1; i>0; i--) { const j = Math.floor(Math.random()*(i+1)); [qs[i],qs[j]]=[qs[j],qs[i]]; }
-    filtered = qs.flat();
+  if (currentMode === 'quiz') {
+    // 測驗模式：使用所有單字作為題目
+    filtered = questionData.filter((q) => yr === 'all' || String(q.year) === yr);
+    if (document.getElementById('shuffle-chk').checked) {
+      for (let i = filtered.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [filtered[i], filtered[j]] = [filtered[j], filtered[i]];
+      }
+    }
+    idx = 0;
+    quizScore = { correct: 0, wrong: 0 };
+    document.getElementById('status').textContent = `測驗模式：共 ${filtered.length} 個單字`;
+  } else {
+    // 練習模式：使用原有邏輯
+    filtered = items.filter((it) => yr === 'all' || String(it.year) === yr);
+    if (document.getElementById('shuffle-chk').checked) {
+      let qs = [];
+      let cur = null;
+      let grp = [];
+      filtered.forEach((it) => {
+        const k = `${it.year}-${it.qNum}`;
+        if (!cur || cur !== k) {
+          if (grp.length) qs.push(grp);
+          grp = [it];
+          cur = k;
+        } else {
+          grp.push(it);
+        }
+      });
+      if (grp.length) qs.push(grp);
+      for (let i = qs.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [qs[i], qs[j]] = [qs[j], qs[i]];
+      }
+      filtered = qs.flat();
+    }
+    idx = 0;
+    document.getElementById('status').textContent = `共 ${filtered.length} 個單字（${Math.round(filtered.length / 6)} 題）`;
   }
-  idx = 0;
-  document.getElementById('status').textContent = '共 ' + filtered.length + ' 個單字（' + Math.round(filtered.length/6) + ' 題）';
 }
 
 function roleLabel(role) {
   if (role === 'underlined') return '題目';
-  return '選項 ' + role.replace('option','');
+  return `選項 ${role.replace('option', '')}`;
+}
+
+function switchMode(mode) {
+  currentMode = mode;
+  // 更新模式按鈕樣式
+  const practiceBtn = document.getElementById('mode-practice');
+  const quizBtn = document.getElementById('mode-quiz');
+  
+  if (mode === 'practice') {
+    practiceBtn.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+    practiceBtn.style.color = '#fff';
+    quizBtn.style.background = 'transparent';
+    quizBtn.style.color = '#4a5568';
+  } else {
+    quizBtn.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+    quizBtn.style.color = '#fff';
+    practiceBtn.style.background = 'transparent';
+    practiceBtn.style.color = '#4a5568';
+  }
+  
+  const card = document.getElementById('word-card');
+  if (mode === 'quiz') {
+    card.classList.add('quiz-mode');
+    // 隱藏練習控制項和設定
+    document.getElementById('practice-controls').style.display = 'none';
+    document.getElementById('setting-rate').style.display = 'none';
+    document.getElementById('setting-pause').style.display = 'none';
+    // 顯示測驗延遲設定
+    document.getElementById('setting-quiz-delay').style.display = 'flex';
+  } else {
+    card.classList.remove('quiz-mode');
+    // 顯示練習控制項和設定
+    document.getElementById('practice-controls').style.display = 'flex';
+    document.getElementById('setting-rate').style.display = 'flex';
+    document.getElementById('setting-pause').style.display = 'flex';
+    // 隱藏測驗延遲設定
+    document.getElementById('setting-quiz-delay').style.display = 'none';
+  }
+  stopPlay();
+  buildList();
+  showWord();
+}
+
+// 初始化：設定為練習模式並更新按鈕樣式
+function initApp() {
+  currentMode = 'practice';
+  // 設定初始按鈕樣式（練習模式反白）
+  document.getElementById('mode-practice').style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+  document.getElementById('mode-practice').style.color = '#fff';
+  document.getElementById('mode-quiz').style.background = 'transparent';
+  document.getElementById('mode-quiz').style.color = '#4a5568';
+  buildList();
+  showWord();
+}
+
+function shuffleArray(arr) {
+  const shuffled = [...arr];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
 }
 
 function showWord() {
   if (!filtered.length) return;
   const w = filtered[idx];
-  document.getElementById('year-badge').textContent = w.qLabel + ' — ' + roleLabel(w.role);
-  document.getElementById('word-en').textContent = w.en;
-  document.getElementById('word-zh').textContent = w.zh;
-  document.getElementById('word-num').textContent = (idx+1) + ' / ' + filtered.length;
-  const pct = filtered.length > 1 ? Math.round(idx/(filtered.length-1)*100) : 100;
-  document.getElementById('progress-bar').style.width = pct + '%';
-  const sameQ = filtered.filter(it => it.year === w.year && it.qNum === w.qNum);
-  const row = document.getElementById('opts-row');
-  row.innerHTML = '';
-  sameQ.forEach(it => {
-    const chip = document.createElement('span');
-    chip.className = 'opt-chip' + (it === w ? ' active' : '');
-    chip.textContent = it.en;
-    row.appendChild(chip);
-  });
+  answered = false;
+  document.getElementById('quiz-feedback').textContent = '';
+  document.getElementById('quiz-feedback').className = 'quiz-feedback';
+  
+  // 控制控制列的顯示
+  document.getElementById('quiz-controls').style.display = currentMode === 'quiz' ? 'flex' : 'none';
+  
+  if (currentMode === 'quiz') {
+    // 測驗模式：隱藏進度條和中文意思
+    document.getElementById('progress-bar').style.width = '0%';
+    document.getElementById('year-badge').textContent = w.qLabel;
+    document.getElementById('word-en').textContent = w.en;
+    document.getElementById('word-zh').textContent = ''; // 測驗模式不顯示中文
+    document.getElementById('word-num').textContent = `${idx + 1} / ${filtered.length}`;
+    document.getElementById('opts-row').innerHTML = '';
+    
+    // 生成測驗選項
+    const quizContainer = document.getElementById('quiz-opts');
+    quizContainer.style.display = 'flex';
+    quizContainer.innerHTML = '';
+    
+    // 準備選項：正確答案 + 4 個錯誤答案
+    const correctAnswer = { en: w.en, zh: w.zh, isCorrect: true };
+    const allOtherWords = questionData.filter((q) => q.en !== w.en && q.zh !== w.zh);
+    const shuffledOthers = shuffleArray(allOtherWords).slice(0, 4);
+    const wrongAnswers = shuffledOthers.map((q) => ({ en: q.en, zh: q.zh, isCorrect: false }));
+    
+    // 混合正確和錯誤答案
+    const allOptions = shuffleArray([correctAnswer, ...wrongAnswers]);
+    
+    // 建立選項按鈕（題目是英文，顯示中文選項）
+    allOptions.forEach((opt) => {
+      const btn = document.createElement('button');
+      btn.className = 'quiz-option-btn';
+      btn.textContent = opt.zh; // 顯示中文答案
+      btn.onclick = () => checkAnswer(btn, opt.isCorrect, w);
+      quizContainer.appendChild(btn);
+    });
+  } else {
+    // 練習模式
+    document.getElementById('quiz-opts').style.display = 'none';
+    document.getElementById('year-badge').textContent = `${w.qLabel} — ${roleLabel(w.role)}`;
+    document.getElementById('word-en').textContent = w.en;
+    document.getElementById('word-zh').textContent = w.zh;
+    document.getElementById('word-num').textContent = `${idx + 1} / ${filtered.length}`;
+    const pct = filtered.length > 1 ? Math.round((idx / (filtered.length - 1)) * 100) : 100;
+    document.getElementById('progress-bar').style.width = `${pct}%`;
+    const sameQ = filtered.filter((it) => it.year === w.year && it.qNum === w.qNum);
+    const row = document.getElementById('opts-row');
+    row.innerHTML = '';
+    sameQ.forEach((it) => {
+      const chip = document.createElement('span');
+      chip.className = `opt-chip${it === w ? ' active' : ''}`;
+      chip.textContent = it.en;
+      row.appendChild(chip);
+    });
+  }
+}
+
+function checkAnswer(btn, isCorrect, question) {
+  if (answered) return; // 防止重複答題
+  answered = true;
+  
+  const feedback = document.getElementById('quiz-feedback');
+  const allBtns = document.querySelectorAll('.quiz-option-btn');
+  
+  if (isCorrect) {
+    btn.classList.add('correct');
+    feedback.textContent = '✓ 答對了！';
+    feedback.className = 'quiz-feedback correct';
+    quizScore.correct++;
+    
+    // 播放發音
+    const u1 = new SpeechSynthesisUtterance(question.en);
+    u1.lang = 'en-US';
+    u1.rate = speakRate;
+    window.speechSynthesis.speak(u1);
+    
+    // 根據設定的延遲秒數自動跳往下一題
+    setTimeout(() => {
+      if (idx < filtered.length - 1) {
+        idx++;
+        answered = false;
+        showWord();
+      }
+    }, quizDelay * 1000);
+  } else {
+    btn.classList.add('wrong');
+    // 找出正確答案並標示
+    allBtns.forEach((b) => {
+      if (b.textContent === question.zh) {
+        b.classList.add('correct');
+      }
+    });
+    feedback.textContent = `✗ 答錯了！正確答案：${question.zh}`;
+    feedback.className = 'quiz-feedback wrong';
+    quizScore.wrong++;
+  }
+  
+  // 更新計分
+  const total = quizScore.correct + quizScore.wrong;
+  const accuracy = total > 0 ? Math.round((quizScore.correct / total) * 100) : 0;
+  document.getElementById('status').textContent = `測驗模式：${quizScore.correct}對 ${quizScore.wrong}錯（正確率：${accuracy}%）`;
 }
 
 function speakCurrent(cb) {
@@ -516,42 +983,94 @@ function speakCurrent(cb) {
   const w = filtered[idx];
   window.speechSynthesis.cancel();
   const u1 = new SpeechSynthesisUtterance(w.en);
-  u1.lang = 'en-US'; u1.rate = speakRate;
+  u1.lang = 'en-US';
+  u1.rate = speakRate;
   const u2 = new SpeechSynthesisUtterance(w.zh);
-  u2.lang = 'zh-TW'; u2.rate = 0.9;
+  u2.lang = 'zh-TW';
+  u2.rate = 0.9;
   window.speechSynthesis.speak(u1);
   u1.onend = () => {
     timer = setTimeout(() => {
       window.speechSynthesis.speak(u2);
-      u2.onend = () => { if (cb) timer = setTimeout(cb, pauseSec * 1000); };
+      u2.onend = () => {
+        if (cb) timer = setTimeout(cb, pauseSec * 1000);
+      };
     }, 250);
   };
 }
 
 function playNext() {
   if (!playing) return;
-  if (idx < filtered.length - 1) { idx++; showWord(); speakCurrent(playNext); }
-  else { playing = false; document.getElementById('btn-play').textContent = '播放'; }
+  if (idx < filtered.length - 1) {
+    idx++;
+    showWord();
+    speakCurrent(playNext);
+  } else {
+    playing = false;
+    document.getElementById('btn-play').textContent = '播放';
+  }
 }
 
 function togglePlay() {
   if (!filtered.length) return;
   playing = !playing;
   document.getElementById('btn-play').textContent = playing ? '暫停' : '播放';
-  if (playing) speakCurrent(playNext);
-  else { window.speechSynthesis.cancel(); clearTimeout(timer); }
+  if (playing) {
+    speakCurrent(playNext);
+  } else {
+    window.speechSynthesis.cancel();
+    clearTimeout(timer);
+  }
 }
 
-function prevItem() { stopPlay(); if (idx > 0) { idx--; showWord(); } }
-function nextItem() { stopPlay(); if (idx < filtered.length-1) { idx++; showWord(); } }
+function prevItem() {
+  stopPlay();
+  if (idx > 0) {
+    idx--;
+    showWord();
+  }
+}
+
+function nextItem() {
+  stopPlay();
+  if (idx < filtered.length - 1) {
+    idx++;
+    showWord();
+  }
+}
+
 function stopPlay() {
-  if (playing) { playing = false; window.speechSynthesis.cancel(); clearTimeout(timer); document.getElementById('btn-play').textContent = '播放'; }
+  if (playing) {
+    playing = false;
+    window.speechSynthesis.cancel();
+    clearTimeout(timer);
+    document.getElementById('btn-play').textContent = '播放';
+  }
 }
-function applyFilter() { stopPlay(); buildList(); showWord(); }
-function updateRate() { speakRate = parseFloat(document.getElementById('rate-slider').value); document.getElementById('rate-val').textContent = speakRate.toFixed(1) + 'x'; }
-function updatePause() { pauseSec = parseFloat(document.getElementById('pause-slider').value); document.getElementById('pause-val').textContent = pauseSec.toFixed(1) + '秒'; }
 
-buildList(); showWord();
+function applyFilter() {
+  stopPlay();
+  buildList();
+  showWord();
+}
+
+function updateRate() {
+  speakRate = parseFloat(document.getElementById('rate-slider').value);
+  document.getElementById('rate-val').textContent = `${speakRate.toFixed(1)}x`;
+}
+
+function updatePause() {
+  pauseSec = parseFloat(document.getElementById('pause-slider').value);
+  document.getElementById('pause-val').textContent = `${pauseSec.toFixed(1)} 秒`;
+}
+
+function updateQuizDelay() {
+  quizDelay = parseFloat(document.getElementById('quiz-delay-slider').value);
+  document.getElementById('quiz-delay-val').textContent = `${quizDelay.toFixed(1)} 秒`;
+}
+
+// 初始化應用程式
+initApp();
 </script>
 </body>
 </html>
