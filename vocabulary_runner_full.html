@@ -273,10 +273,31 @@ input[type=checkbox] {
   display: flex;
   justify-content: center;
   gap: 10px;
+  flex-wrap: wrap;
 }
 .btn-mode {
   font-size: 14px;
   padding: 8px 16px;
+}
+.favorite-star {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  font-size: 24px;
+  cursor: pointer;
+  color: #cbd5e0;
+  transition: all 0.2s;
+  user-select: none;
+}
+.favorite-star:hover {
+  transform: scale(1.2);
+}
+.favorite-star.active {
+  color: #fbbf24;
+  text-shadow: 0 2px 8px rgba(251, 191, 36, 0.4);
+}
+.word-display {
+  position: relative;
 }
 </style>
 </head>
@@ -287,12 +308,14 @@ input[type=checkbox] {
     <div class="mode-buttons">
       <button class="btn btn-mode" id="mode-practice" onclick="switchMode('practice')">練習模式</button>
       <button class="btn btn-mode" id="mode-quiz" onclick="switchMode('quiz')">測驗模式</button>
+      <button class="btn btn-mode" id="mode-favorite" onclick="switchMode('favorite')">我的最愛</button>
     </div>
   </div>
 
   <div class="card" id="word-card">
     <div class="word-display">
       <div class="year-badge" id="year-badge">114 年 第 1 題</div>
+      <div class="favorite-star" id="favorite-star" onclick="toggleFavorite()">☆</div>
       <div class="word-en" id="word-en">—</div>
       <div class="word-zh" id="word-zh">—</div>
       <div class="options-row" id="opts-row"></div>
@@ -756,9 +779,10 @@ let pauseSec = 1.5;
 let speakRate = 0.85;
 let quizDelay = 1; // 測驗模式自動跳題延遲秒數
 let timer = null;
-let currentMode = 'practice'; // 'practice' 或 'quiz'
+let currentMode = 'practice'; // 'practice' 或 'quiz' 或 'favorite'
 let quizScore = { correct: 0, wrong: 0 };
 let answered = false; // 是否已答題
+let favorites = []; // 儲存的喜愛單字列表（英文單字）
 
 function buildList() {
   const yr = document.getElementById('year-filter').value;
@@ -774,6 +798,32 @@ function buildList() {
     idx = 0;
     quizScore = { correct: 0, wrong: 0 };
     document.getElementById('status').textContent = `測驗模式：共 ${filtered.length} 個單字`;
+  } else if (currentMode === 'favorite') {
+    // 我的最愛模式：顯示所有喜愛的單字，合併相同單字的不同年分
+    const favoriteWords = questionData.filter((q) => favorites.includes(q.en));
+    const groupedMap = new Map();
+    favoriteWords.forEach((q) => {
+      if (!groupedMap.has(q.en)) {
+        groupedMap.set(q.en, { ...q, allLabels: [q.qLabel] });
+      } else {
+        const existing = groupedMap.get(q.en);
+        if (!existing.allLabels.includes(q.qLabel)) {
+          existing.allLabels.push(q.qLabel);
+        }
+      }
+    });
+    filtered = Array.from(groupedMap.values());
+    if (yr !== 'all') {
+      filtered = filtered.filter((q) => String(q.year) === yr);
+    }
+    if (document.getElementById('shuffle-chk').checked) {
+      for (let i = filtered.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [filtered[i], filtered[j]] = [filtered[j], filtered[i]];
+      }
+    }
+    idx = 0;
+    document.getElementById('status').textContent = `我的最愛：共 ${filtered.length} 個單字`;
   } else {
     // 練習模式：使用原有邏輯
     filtered = items.filter((it) => yr === 'all' || String(it.year) === yr);
@@ -813,17 +863,26 @@ function switchMode(mode) {
   // 更新模式按鈕樣式
   const practiceBtn = document.getElementById('mode-practice');
   const quizBtn = document.getElementById('mode-quiz');
+  const favoriteBtn = document.getElementById('mode-favorite');
   
+  // 重置所有按鈕樣式
+  practiceBtn.style.background = 'transparent';
+  practiceBtn.style.color = '#4a5568';
+  quizBtn.style.background = 'transparent';
+  quizBtn.style.color = '#4a5568';
+  favoriteBtn.style.background = 'transparent';
+  favoriteBtn.style.color = '#4a5568';
+  
+  // 設定當前模式按鈕樣式
   if (mode === 'practice') {
     practiceBtn.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
     practiceBtn.style.color = '#fff';
-    quizBtn.style.background = 'transparent';
-    quizBtn.style.color = '#4a5568';
-  } else {
+  } else if (mode === 'quiz') {
     quizBtn.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
     quizBtn.style.color = '#fff';
-    practiceBtn.style.background = 'transparent';
-    practiceBtn.style.color = '#4a5568';
+  } else if (mode === 'favorite') {
+    favoriteBtn.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+    favoriteBtn.style.color = '#fff';
   }
   
   const card = document.getElementById('word-card');
@@ -871,11 +930,35 @@ function shuffleArray(arr) {
 }
 
 function showWord() {
-  if (!filtered.length) return;
+  // 若無任何單字（特別是我的最愛模式），清空顯示
+  if (!filtered.length) {
+    document.getElementById('year-badge').textContent = '—';
+    document.getElementById('word-en').textContent = '—';
+    document.getElementById('word-zh').textContent = '—';
+    document.getElementById('word-num').textContent = '— / —';
+    document.getElementById('progress-bar').style.width = '0%';
+    document.getElementById('opts-row').innerHTML = '';
+    document.getElementById('quiz-opts').style.display = 'none';
+    document.getElementById('quiz-feedback').textContent = '';
+    document.getElementById('quiz-controls').style.display = 'none';
+    document.getElementById('favorite-star').style.display = 'none';
+    return;
+  }
+  
   const w = filtered[idx];
   answered = false;
   document.getElementById('quiz-feedback').textContent = '';
   document.getElementById('quiz-feedback').className = 'quiz-feedback';
+  
+  // 更新星星圖示
+  const starEl = document.getElementById('favorite-star');
+  if (currentMode === 'quiz') {
+    starEl.style.display = 'none'; // 測驗模式隱藏星星
+  } else {
+    starEl.style.display = 'block';
+    starEl.textContent = favorites.includes(w.en) ? '★' : '☆';
+    starEl.classList.toggle('active', favorites.includes(w.en));
+  }
   
   // 控制控制列的顯示
   document.getElementById('quiz-controls').style.display = currentMode === 'quiz' ? 'flex' : 'none';
@@ -912,23 +995,32 @@ function showWord() {
       quizContainer.appendChild(btn);
     });
   } else {
-    // 練習模式
+    // 練習模式和我的最愛模式
     document.getElementById('quiz-opts').style.display = 'none';
-    document.getElementById('year-badge').textContent = `${w.qLabel} — ${roleLabel(w.role)}`;
+    if (currentMode === 'favorite') {
+      // 在我的最愛模式中，若單字出現在多個年分，用 "/" 分隔顯示
+      document.getElementById('year-badge').textContent = w.allLabels ? w.allLabels.join(' / ') : w.qLabel;
+    } else {
+      document.getElementById('year-badge').textContent = `${w.qLabel} — ${roleLabel(w.role)}`;
+    }
     document.getElementById('word-en').textContent = w.en;
     document.getElementById('word-zh').textContent = w.zh;
     document.getElementById('word-num').textContent = `${idx + 1} / ${filtered.length}`;
     const pct = filtered.length > 1 ? Math.round((idx / (filtered.length - 1)) * 100) : 100;
     document.getElementById('progress-bar').style.width = `${pct}%`;
-    const sameQ = filtered.filter((it) => it.year === w.year && it.qNum === w.qNum);
     const row = document.getElementById('opts-row');
     row.innerHTML = '';
-    sameQ.forEach((it) => {
-      const chip = document.createElement('span');
-      chip.className = `opt-chip${it === w ? ' active' : ''}`;
-      chip.textContent = it.en;
-      row.appendChild(chip);
-    });
+    
+    // 只在練習模式中顯示選項列
+    if (currentMode !== 'favorite') {
+      const sameQ = filtered.filter((it) => it.year === w.year && it.qNum === w.qNum);
+      sameQ.forEach((it) => {
+        const chip = document.createElement('span');
+        chip.className = `opt-chip${it === w ? ' active' : ''}`;
+        chip.textContent = it.en;
+        row.appendChild(chip);
+      });
+    }
   }
 }
 
@@ -1067,6 +1159,24 @@ function updatePause() {
 function updateQuizDelay() {
   quizDelay = parseFloat(document.getElementById('quiz-delay-slider').value);
   document.getElementById('quiz-delay-val').textContent = `${quizDelay.toFixed(1)} 秒`;
+}
+
+function toggleFavorite() {
+  if (!filtered.length) return;
+  const w = filtered[idx];
+  const starEl = document.getElementById('favorite-star');
+  
+  if (favorites.includes(w.en)) {
+    // 移除最愛
+    favorites = favorites.filter((f) => f !== w.en);
+    starEl.textContent = '☆';
+    starEl.classList.remove('active');
+  } else {
+    // 加入最愛
+    favorites.push(w.en);
+    starEl.textContent = '★';
+    starEl.classList.add('active');
+  }
 }
 
 // 初始化應用程式
