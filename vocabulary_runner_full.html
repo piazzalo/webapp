@@ -746,7 +746,7 @@ let questionData = [];
 DATA.forEach((row) => {
   const [yr, qn, uen, uzh, ...opts] = row;
   const label = `${yr}年 第${qn}題`;
-  
+
   // 加入題目單字
   questionData.push({
     year: yr,
@@ -756,7 +756,7 @@ DATA.forEach((row) => {
     qLabel: label,
     source: 'question'
   });
-  
+
   // 加入選項單字（如果有）
   opts.forEach((opt, i) => {
     if (opt && opt[0]) {
@@ -783,6 +783,26 @@ let currentMode = 'practice'; // 'practice' 或 'quiz' 或 'favorite'
 let quizScore = { correct: 0, wrong: 0 };
 let answered = false; // 是否已答題
 let favorites = []; // 儲存的喜愛單字列表（英文單字）
+
+// 保存收藏到 localStorage
+function saveFavorites() {
+  localStorage.setItem('favorites', JSON.stringify(favorites));
+}
+
+// 從 localStorage 讀取收藏
+function loadFavorites() {
+  const saved = localStorage.getItem('favorites');
+  if (saved) {
+    try {
+      favorites = JSON.parse(saved);
+    } catch (e) {
+      console.error('讀取收藏失敗：', e);
+      favorites = [];
+    }
+  } else {
+    favorites = [];
+  }
+}
 
 function buildList() {
   const yr = document.getElementById('year-filter').value;
@@ -910,6 +930,7 @@ function switchMode(mode) {
 
 // 初始化：設定為練習模式並更新按鈕樣式
 function initApp() {
+  loadFavorites(); // 讀取之前保存的收藏
   currentMode = 'practice';
   // 設定初始按鈕樣式（練習模式反白）
   document.getElementById('mode-practice').style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
@@ -1165,7 +1186,7 @@ function toggleFavorite() {
   if (!filtered.length) return;
   const w = filtered[idx];
   const starEl = document.getElementById('favorite-star');
-  
+
   if (favorites.includes(w.en)) {
     // 移除最愛
     favorites = favorites.filter((f) => f !== w.en);
@@ -1177,6 +1198,9 @@ function toggleFavorite() {
     starEl.textContent = '★';
     starEl.classList.add('active');
   }
+
+  // 保存到 localStorage
+  saveFavorites();
 }
 
 // 初始化應用程式
