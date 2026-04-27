@@ -1092,33 +1092,70 @@ function checkAnswer(btn, isCorrect, question) {
 }
 
 function speakCurrent(cb) {
-  if (!filtered.length) return;
+  if (!filtered.length || !playing) return;
   const w = filtered[idx];
+  
+  // 確保先清除所有正在進行的語音合成
   window.speechSynthesis.cancel();
-  const u1 = new SpeechSynthesisUtterance(w.en);
-  u1.lang = 'en-US';
-  u1.rate = speakRate;
-  const u2 = new SpeechSynthesisUtterance(w.zh);
-  u2.lang = 'zh-TW';
-  u2.rate = 0.9;
-  window.speechSynthesis.speak(u1);
-  u1.onend = () => {
-    timer = setTimeout(() => {
-      window.speechSynthesis.speak(u2);
-      u2.onend = () => {
+  
+  // 等待一小段時間確保 cancel 完成
+  setTimeout(() => {
+    if (!playing) return; // 如果已停止，則不繼續
+    
+    const u1 = new SpeechSynthesisUtterance(w.en);
+    u1.lang = 'en-US';
+    u1.rate = speakRate;
+    
+    const u2 = new SpeechSynthesisUtterance(w.zh);
+    u2.lang = 'zh-TW';
+    u2.rate = 0.9;
+    
+    // 添加錯誤處理
+    u1.onerror = (e) => {
+      console.error('語音合成錯誤:', e);
+      if (playing) {
+        // 出錯時仍然嘗試繼續播放
         if (cb) timer = setTimeout(cb, pauseSec * 1000);
-      };
-    }, 250);
-  };
+      }
+    };
+    
+    u2.onerror = (e) => {
+      console.error('語音合成錯誤:', e);
+      if (playing && cb) {
+        timer = setTimeout(cb, pauseSec * 1000);
+      }
+    };
+    
+    window.speechSynthesis.speak(u1);
+    
+    u1.onend = () => {
+      if (!playing) return; // 如果已停止，則不繼續
+      timer = setTimeout(() => {
+        if (!playing) return; // 再次確認未被停止
+        window.speechSynthesis.speak(u2);
+        u2.onend = () => {
+          if (!playing) return; // 最後確認未被停止
+          if (cb) timer = setTimeout(cb, pauseSec * 1000);
+        };
+      }, 250);
+    };
+  }, 100); // 等待 100ms 讓 cancel 完成
 }
 
 function playNext() {
   if (!playing) return;
+  
   if (idx < filtered.length - 1) {
     idx++;
     showWord();
-    speakCurrent(playNext);
+    // 使用小延遲確保狀態同步
+    setTimeout(() => {
+      if (playing) { // 確認播放狀態未改變
+        speakCurrent(playNext);
+      }
+    }, 50);
   } else {
+    // 播放完成
     playing = false;
     document.getElementById('btn-play').textContent = '播放';
   }
@@ -1126,13 +1163,21 @@ function playNext() {
 
 function togglePlay() {
   if (!filtered.length) return;
-  playing = !playing;
-  document.getElementById('btn-play').textContent = playing ? '暫停' : '播放';
+  
   if (playing) {
-    speakCurrent(playNext);
+    // 停止播放
+    stopPlay();
   } else {
-    window.speechSynthesis.cancel();
-    clearTimeout(timer);
+    // 開始播放
+    playing = true;
+    document.getElementById('btn-play').textContent = '暫停';
+    
+    // 使用延遲確保 speechSynthesis 處於正確狀態
+    setTimeout(() => {
+      if (playing) { // 再次確認未被中斷
+        speakCurrent(playNext);
+      }
+    }, 50);
   }
 }
 
@@ -1155,8 +1200,8 @@ function nextItem() {
 function stopPlay() {
   if (playing) {
     playing = false;
-    window.speechSynthesis.cancel();
     clearTimeout(timer);
+    window.speechSynthesis.cancel();
     document.getElementById('btn-play').textContent = '播放';
   }
 }
