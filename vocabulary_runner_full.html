@@ -973,17 +973,24 @@ function showWord() {
   
   // 更新星星圖示
   const starEl = document.getElementById('favorite-star');
+  starEl.style.display = 'block';
+  starEl.textContent = favorites.includes(w.en) ? '★' : '☆';
+  starEl.classList.toggle('active', favorites.includes(w.en));
+
+  // 在測驗模式中星星為唯讀（不可點擊）
   if (currentMode === 'quiz') {
-    starEl.style.display = 'none'; // 測驗模式隱藏星星
+    starEl.style.cursor = 'default';
+    starEl.style.pointerEvents = 'none';
+    starEl.style.opacity = '0.7';
   } else {
-    starEl.style.display = 'block';
-    starEl.textContent = favorites.includes(w.en) ? '★' : '☆';
-    starEl.classList.toggle('active', favorites.includes(w.en));
+    starEl.style.cursor = 'pointer';
+    starEl.style.pointerEvents = 'auto';
+    starEl.style.opacity = '1';
   }
-  
+
   // 控制控制列的顯示
   document.getElementById('quiz-controls').style.display = currentMode === 'quiz' ? 'flex' : 'none';
-  
+
   if (currentMode === 'quiz') {
     // 測驗模式：隱藏進度條和中文意思
     document.getElementById('progress-bar').style.width = '0%';
@@ -1083,6 +1090,16 @@ function checkAnswer(btn, isCorrect, question) {
     feedback.textContent = `✗ 答錯了！正確答案：${question.zh}`;
     feedback.className = 'quiz-feedback wrong';
     quizScore.wrong++;
+
+    // 當答題錯誤時，自動加入最愛收藏
+    if (!favorites.includes(question.en)) {
+      favorites.push(question.en);
+      saveFavorites();
+      // 更新星星圖示
+      const starEl = document.getElementById('favorite-star');
+      starEl.textContent = '★';
+      starEl.classList.add('active');
+    }
   }
   
   // 更新計分
