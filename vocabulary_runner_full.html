@@ -1017,10 +1017,10 @@ function showWord() {
     els.progressBar.style.width = `${pct}%`;
     els.optsRow.innerHTML = '';
 
-    if (currentMode !== 'favorite') {
-      const sameQ = filtered.filter((it) => it.year === w.year && it.qNum === w.qNum);
+    {
+      const listToChip = currentMode === 'favorite' ? filtered : filtered.filter((it) => it.year === w.year && it.qNum === w.qNum);
       const frag = document.createDocumentFragment();
-      sameQ.forEach((it) => {
+      listToChip.forEach((it) => {
         const chip = document.createElement('span');
         chip.className = `opt-chip${it === w ? ' active' : ''}`;
         chip.textContent = it.en;
