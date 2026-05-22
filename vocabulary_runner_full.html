@@ -292,14 +292,14 @@ input[type=checkbox] {
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
 }
 .favorite-star {
-  position: absolute;
-  top: 12px;
-  right: 12px;
   font-size: 24px;
   cursor: pointer;
   color: #cbd5e0;
   transition: all 0.2s;
   user-select: none;
+  margin-left: 8px;
+  display: inline-block;
+  vertical-align: middle;
 }
 .favorite-star:hover {
   transform: scale(1.2);
@@ -327,7 +327,6 @@ input[type=checkbox] {
   <div class="card" id="word-card">
     <div class="word-display">
       <div class="year-badge" id="year-badge">114 年 第 1 題</div>
-      <div class="favorite-star" id="favorite-star" onclick="toggleFavorite()">☆</div>
       <div class="word-en" id="word-en">—</div>
       <div class="word-zh" id="word-zh">—</div>
       <div class="options-row" id="opts-row"></div>
@@ -342,6 +341,7 @@ input[type=checkbox] {
       <button class="btn" onclick="prevItem()">上一個</button>
       <button class="btn btn-play" id="btn-play" onclick="togglePlay()">播放</button>
       <button class="btn" onclick="nextItem()">下一個</button>
+      <div class="favorite-star" id="favorite-star" onclick="toggleFavorite()">☆</div>
     </div>
     <div class="controls" id="quiz-controls" style="display:none;margin-top:8px;">
       <button class="btn" onclick="prevItem()" style="flex:1">上一題</button>
@@ -355,6 +355,7 @@ input[type=checkbox] {
       <label>年度</label>
       <select id="year-filter" onchange="applyFilter()">
         <option value="all">全部</option>
+        <option value="999">多益</option>
         <option value="115">115年</option>
         <option value="114">114年</option>
         <option value="113">113年</option>
@@ -739,7 +740,177 @@ const DATA = [
 [98,18,"breach","違反",["avoidance","避免"],["cause","原因"],["evidence","證據"],["manner","方式"],null],
 [98,19,"concomitant","伴隨的",["taciturn","沉默的"],["equivocal","模糊的"],["empirical","經驗的"],["ingenuous","天真的"],null],
 [98,20,"deviate from","偏離",["overlap with","重疊"],["concur with","同意"],["are distorted","扭曲"],["deduce","推論"],null]
+,
+[999,1,"abandon","放棄",null,null,null,null,null],
+[999,2,"abrupt","突然的",null,null,null,null,null],
+[999,3,"accelerate","加速",null,null,null,null,null],
+[999,4,"accommodate","容納；提供住宿",null,null,null,null,null],
+[999,5,"accountability","問責；責任",null,null,null,null,null],
+[999,6,"accrue","累積",null,null,null,null,null],
+[999,7,"acquisition","收購",null,null,null,null,null],
+[999,8,"adjacent","鄰近的",null,null,null,null,null],
+[999,9,"administer","管理",null,null,null,null,null],
+[999,10,"adverse","不利的",null,null,null,null,null],
+[999,11,"advocate","提倡",null,null,null,null,null],
+[999,12,"aggregate","總計",null,null,null,null,null],
+[999,13,"allocate","分配",null,null,null,null,null],
+[999,14,"amend","修正",null,null,null,null,null],
+[999,15,"anticipate","預期",null,null,null,null,null],
+[999,16,"appraisal","評估",null,null,null,null,null],
+[999,17,"arbitrary","任意的",null,null,null,null,null],
+[999,18,"articulate","清楚表達",null,null,null,null,null],
+[999,19,"assertive","堅定的",null,null,null,null,null],
+[999,20,"assurance","保證",null,null,null,null,null],
+[999,21,"attain","達成",null,null,null,null,null],
+[999,22,"authenticate","驗證",null,null,null,null,null],
+[999,23,"authorize","授權",null,null,null,null,null],
+[999,24,"benchmark","基準",null,null,null,null,null],
+[999,25,"boast","吹噓",null,null,null,null,null],
+[999,26,"boost","提升",null,null,null,null,null],
+[999,27,"breach","違反",null,null,null,null,null],
+[999,28,"candid","坦率的",null,null,null,null,null],
+[999,29,"capacity","容量；能力",null,null,null,null,null],
+[999,30,"collaborate","合作",null,null,null,null,null],
+[999,31,"commence","開始",null,null,null,null,null],
+[999,32,"commodity","商品",null,null,null,null,null],
+[999,33,"compensate","補償",null,null,null,null,null],
+[999,34,"compliance","遵循",null,null,null,null,null],
+[999,35,"comprehensive","全面的",null,null,null,null,null],
+[999,36,"consecutive","連續的",null,null,null,null,null],
+[999,37,"consolidate","整合",null,null,null,null,null],
+[999,38,"constraint","限制",null,null,null,null,null],
+[999,39,"contingency","意外情況",null,null,null,null,null],
+[999,40,"controversy","爭議",null,null,null,null,null],
+[999,41,"convene","召開",null,null,null,null,null],
+[999,42,"coordinate","協調",null,null,null,null,null],
+[999,43,"credible","可信的",null,null,null,null,null],
+[999,44,"crucial","關鍵的",null,null,null,null,null],
+[999,45,"cultivate","培養",null,null,null,null,null],
+[999,46,"deduct","扣除",null,null,null,null,null],
+[999,47,"deficit","赤字",null,null,null,null,null],
+[999,48,"delegate","委派",null,null,null,null,null],
+[999,49,"demonstrate","展示",null,null,null,null,null],
+[999,50,"denote","表示",null,null,null,null,null],
+[999,51,"deploy","部署",null,null,null,null,null],
+[999,52,"deteriorate","惡化",null,null,null,null,null],
+[999,53,"devise","設計",null,null,null,null,null],
+[999,54,"diagnose","診斷",null,null,null,null,null],
+[999,55,"disclose","揭露",null,null,null,null,null],
+[999,56,"discretion","判斷力",null,null,null,null,null],
+[999,57,"disrupt","擾亂",null,null,null,null,null],
+[999,58,"diversify","多樣化",null,null,null,null,null],
+[999,59,"domestic","國內的",null,null,null,null,null],
+[999,60,"duration","持續時間",null,null,null,null,null],
+[999,61,"elaborate","詳盡的",null,null,null,null,null],
+[999,62,"eliminate","消除",null,null,null,null,null],
+[999,63,"emphasize","強調",null,null,null,null,null],
+[999,64,"encounter","遭遇",null,null,null,null,null],
+[999,65,"endorse","支持",null,null,null,null,null],
+[999,66,"enhance","提升",null,null,null,null,null],
+[999,67,"enormous","巨大的",null,null,null,null,null],
+[999,68,"ensure","確保",null,null,null,null,null],
+[999,69,"equivalent","相等的",null,null,null,null,null],
+[999,70,"evaluate","評估",null,null,null,null,null],
+[999,71,"exceed","超過",null,null,null,null,null],
+[999,72,"exclusive","獨家的",null,null,null,null,null],
+[999,73,"expand","擴展",null,null,null,null,null],
+[999,74,"expedite","加速處理",null,null,null,null,null],
+[999,75,"expertise","專業知識",null,null,null,null,null],
+[999,76,"facilitate","促進",null,null,null,null,null],
+[999,77,"feasible","可行的",null,null,null,null,null],
+[999,78,"fluctuate","波動",null,null,null,null,null],
+[999,79,"forecast","預測",null,null,null,null,null],
+[999,80,"formulate","制定",null,null,null,null,null],
+[999,81,"franchise","加盟",null,null,null,null,null],
+[999,82,"fundamental","基本的",null,null,null,null,null],
+[999,83,"generate","產生",null,null,null,null,null],
+[999,84,"guarantee","保證",null,null,null,null,null],
+[999,85,"hazard","危險",null,null,null,null,null],
+[999,86,"hierarchy","階層",null,null,null,null,null],
+[999,87,"hypothesis","假設",null,null,null,null,null],
+[999,88,"implement","實施",null,null,null,null,null],
+[999,89,"incentive","誘因",null,null,null,null,null],
+[999,90,"incur","招致",null,null,null,null,null],
+[999,91,"indispensable","不可或缺的",null,null,null,null,null],
+[999,92,"inevitable","不可避免的",null,null,null,null,null],
+[999,93,"inferior","較差的",null,null,null,null,null],
+[999,94,"infrastructure","基礎建設",null,null,null,null,null],
+[999,95,"initiate","開始",null,null,null,null,null],
+[999,96,"innovative","創新的",null,null,null,null,null],
+[999,97,"inspect","檢查",null,null,null,null,null],
+[999,98,"integrate","整合",null,null,null,null,null],
+[999,99,"intense","強烈的",null,null,null,null,null],
+[999,100,"intervene","介入",null,null,null,null,null],
+[999,101,"inventory","庫存",null,null,null,null,null],
+[999,102,"justify","證明合理",null,null,null,null,null],
+[999,103,"legislation","法規",null,null,null,null,null],
+[999,104,"lucrative","有利可圖的",null,null,null,null,null],
+[999,105,"maintain","維持",null,null,null,null,null],
+[999,106,"mandatory","強制的",null,null,null,null,null],
+[999,107,"manipulate","操控",null,null,null,null,null],
+[999,108,"mediate","調解",null,null,null,null,null],
+[999,109,"merge","合併",null,null,null,null,null],
+[999,110,"negotiate","談判",null,null,null,null,null],
+[999,111,"notable","顯著的",null,null,null,null,null],
+[999,112,"obsolete","過時的",null,null,null,null,null],
+[999,113,"obtain","獲得",null,null,null,null,null],
+[999,114,"occupy","占據",null,null,null,null,null],
+[999,115,"offset","抵銷",null,null,null,null,null],
+[999,116,"optimize","最佳化",null,null,null,null,null],
+[999,117,"outsource","外包",null,null,null,null,null],
+[999,118,"oversee","監督",null,null,null,null,null],
+[999,119,"parameter","參數",null,null,null,null,null],
+[999,120,"participate","參與",null,null,null,null,null],
+[999,121,"perceive","察覺",null,null,null,null,null],
+[999,122,"persistent","持續的",null,null,null,null,null],
+[999,123,"persuade","說服",null,null,null,null,null],
+[999,124,"phenomenon","現象",null,null,null,null,null],
+[999,125,"preliminary","初步的",null,null,null,null,null],
+[999,126,"preserve","保存",null,null,null,null,null],
+[999,127,"prestigious","有聲望的",null,null,null,null,null],
+[999,128,"prohibit","禁止",null,null,null,null,null],
+[999,129,"prominent","著名的",null,null,null,null,null],
+[999,130,"prospective","未來的",null,null,null,null,null],
+[999,131,"protocol","協定",null,null,null,null,null],
+[999,132,"provision","供應；條款",null,null,null,null,null],
+[999,133,"qualitative","質性的",null,null,null,null,null],
+[999,134,"quantify","量化",null,null,null,null,null],
+[999,135,"recession","衰退",null,null,null,null,null],
+[999,136,"reconcile","調和",null,null,null,null,null],
+[999,137,"redundant","多餘的",null,null,null,null,null],
+[999,138,"refine","精煉",null,null,null,null,null],
+[999,139,"register","登記",null,null,null,null,null],
+[999,140,"regulate","管理",null,null,null,null,null],
+[999,141,"reinforce","加強",null,null,null,null,null],
+[999,142,"reluctant","不情願的",null,null,null,null,null],
+[999,143,"remedy","補救方法",null,null,null,null,null],
+[999,144,"renovate","翻新",null,null,null,null,null],
+[999,145,"revenue","收入",null,null,null,null,null],
+[999,146,"rigorous","嚴格的",null,null,null,null,null],
+[999,147,"simulate","模擬",null,null,null,null,null],
+[999,148,"specify","明確說明",null,null,null,null,null],
+[999,149,"stabilize","穩定",null,null,null,null,null],
+[999,150,"strategic","策略性的",null,null,null,null,null],
+[999,151,"substantial","大量的",null,null,null,null,null],
+[999,152,"supervise","監督",null,null,null,null,null],
+[999,153,"suppress","壓制",null,null,null,null,null],
+[999,154,"sustain","維持",null,null,null,null,null],
+[999,155,"terminate","終止",null,null,null,null,null],
+[999,156,"transaction","交易",null,null,null,null,null],
+[999,157,"transparent","透明的",null,null,null,null,null],
+[999,158,"undergo","經歷",null,null,null,null,null],
+[999,159,"undertake","承擔",null,null,null,null,null],
+[999,160,"utilize","利用",null,null,null,null,null],
+[999,161,"validity","有效性",null,null,null,null,null],
+[999,162,"versatile","多才多藝的",null,null,null,null,null],
+[999,163,"viable","可行的",null,null,null,null,null],
+[999,164,"withstand","承受",null,null,null,null,null],
 ];
+
+// 輔助函數：格式化年分顯示
+function formatYear(yr) {
+  return yr === 999 ? '多益' : `${yr}年`;
+}
 
 // FIX #1: Build items and questionData in a single pass (was two separate forEach loops)
 let items = [];
@@ -747,7 +918,7 @@ let questionData = [];
 
 DATA.forEach((row) => {
   const [yr, qn, uen, uzh, ...opts] = row;
-  const label = `${yr}年 第${qn}題`;
+  const label = yr === 999 ? `多益 第${qn}題` : `${yr}年 第${qn}題`;
   items.push({ year: yr, qNum: qn, en: uen, zh: uzh, qLabel: label, role: 'underlined' });
   questionData.push({ year: yr, qNum: qn, en: uen, zh: uzh, qLabel: label, source: 'question' });
   opts.forEach((opt, i) => {
