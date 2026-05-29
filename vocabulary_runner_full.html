@@ -275,6 +275,66 @@ input[type=checkbox] {
 #setting-quiz-delay {
   display: none;
 }
+.btn-clear-fav {
+  background: #fff5f5;
+  color: #c53030;
+  border: 2px solid #fed7d7;
+  border-radius: 10px;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s;
+  width: 100%;
+}
+.btn-clear-fav:hover {
+  background: #fed7d7;
+  border-color: #f56565;
+  transform: translateY(-1px);
+}
+.btn-clear-fav:active { transform: scale(0.97); }
+.clear-confirm-box {
+  display: none;
+  background: #fff5f5;
+  border: 2px solid #f56565;
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-top: 8px;
+  text-align: center;
+}
+.clear-confirm-box p {
+  font-size: 14px;
+  font-weight: 600;
+  color: #c53030;
+  margin-bottom: 12px;
+}
+.clear-confirm-box .confirm-btns {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+.clear-confirm-box .confirm-btns button {
+  flex: 1;
+  padding: 8px 0;
+  border-radius: 8px;
+  border: none;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s;
+}
+.btn-confirm-yes {
+  background: #e53e3e;
+  color: #fff;
+}
+.btn-confirm-yes:hover { background: #c53030; }
+.btn-confirm-no {
+  background: #edf2f7;
+  color: #4a5568;
+}
+.btn-confirm-no:hover { background: #e2e8f0; }
 .mode-buttons {
   margin-top: 12px;
   display: flex;
@@ -346,6 +406,16 @@ input[type=checkbox] {
     <div class="controls" id="quiz-controls" style="display:none;margin-top:8px;">
       <button class="btn" onclick="prevItem()" style="flex:1">上一題</button>
       <button class="btn" onclick="nextItem()" style="flex:1">下一題</button>
+    </div>
+    <div id="favorite-controls" style="display:none;margin-top:8px;">
+      <button class="btn btn-clear-fav" onclick="showClearConfirm()">🗑 清除所有收藏</button>
+      <div class="clear-confirm-box" id="clear-confirm-box">
+        <p id="clear-confirm-msg">確定要清除所有收藏的單字嗎？</p>
+        <div class="confirm-btns">
+          <button class="btn-confirm-yes" onclick="confirmClear()">確定清除</button>
+          <button class="btn-confirm-no" onclick="hideClearConfirm()">取消</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -970,6 +1040,9 @@ function initEls() {
     modeQuiz:        document.getElementById('mode-quiz'),
     modeFavorite:    document.getElementById('mode-favorite'),
     wordCard:        document.getElementById('word-card'),
+    favoriteControls:document.getElementById('favorite-controls'),
+    clearConfirmBox: document.getElementById('clear-confirm-box'),
+    clearConfirmMsg: document.getElementById('clear-confirm-msg'),
   };
 }
 
@@ -1063,16 +1136,26 @@ function switchMode(mode) {
   if (mode === 'quiz') {
     els.wordCard.classList.add('quiz-mode');
     els.practiceControls.style.display = 'none';
+    els.favoriteControls.style.display = 'none';
     els.settingRate.style.display = 'none';
     els.settingPause.style.display = 'none';
     els.settingQuizDelay.style.display = 'flex';
+  } else if (mode === 'favorite') {
+    els.wordCard.classList.remove('quiz-mode');
+    els.practiceControls.style.display = 'flex';
+    els.favoriteControls.style.display = 'block';
+    els.settingRate.style.display = 'flex';
+    els.settingPause.style.display = 'flex';
+    els.settingQuizDelay.style.display = 'none';
   } else {
     els.wordCard.classList.remove('quiz-mode');
     els.practiceControls.style.display = 'flex';
+    els.favoriteControls.style.display = 'none';
     els.settingRate.style.display = 'flex';
     els.settingPause.style.display = 'flex';
     els.settingQuizDelay.style.display = 'none';
   }
+  hideClearConfirm();
   stopPlay();
   buildList();
   showWord();
@@ -1376,6 +1459,33 @@ function toggleFavorite() {
   }
 
   saveFavorites();
+}
+
+function showClearConfirm() {
+  if (!favorites.length) {
+    els.clearConfirmMsg.textContent = '目前沒有收藏的單字。';
+    els.clearConfirmBox.style.display = 'block';
+    // 只顯示取消，隱藏確定
+    els.clearConfirmBox.querySelector('.btn-confirm-yes').style.display = 'none';
+    return;
+  }
+  els.clearConfirmMsg.textContent = `確定要清除全部 ${favorites.length} 個收藏的單字嗎？`;
+  els.clearConfirmBox.querySelector('.btn-confirm-yes').style.display = '';
+  els.clearConfirmBox.style.display = 'block';
+}
+
+function hideClearConfirm() {
+  if (els && els.clearConfirmBox) els.clearConfirmBox.style.display = 'none';
+}
+
+function confirmClear() {
+  favorites = [];
+  favoritesSet.clear();
+  saveFavorites();
+  hideClearConfirm();
+  buildList();
+  showWord();
+  els.status.textContent = '已清除所有收藏單字。';
 }
 
 // 初始化應用程式
