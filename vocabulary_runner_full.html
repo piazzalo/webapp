@@ -6,118 +6,135 @@
 <title>單字練習</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { 
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft JhengHei', sans-serif; 
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft JhengHei', sans-serif;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  min-height: 100vh; 
-  padding: 2rem 1rem; 
+  min-height: 100vh;
+  padding: 0.5rem 0.5rem;
 }
 #app { max-width: 520px; margin: 0 auto; }
-.header { 
-  text-align: center; 
-  margin-bottom: 2rem; 
+.header {
+  text-align: center;
+  margin-bottom: 0.5rem;
   padding: 1.5rem;
   background: rgba(255, 255, 255, 0.95);
   border-radius: 16px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
-.header h1 { 
-  font-size: 22px; 
-  font-weight: 600; 
-  color: #2d3748; 
+.header h1 {
+  font-size: 22px;
+  font-weight: 600;
+  color: #2d3748;
   margin-bottom: 12px;
 }
 .header p { font-size: 13px; color: #718096; margin-top: 4px; }
-.card { 
-  background: rgba(255, 255, 255, 0.98); 
+.card {
+  background: rgba(255, 255, 255, 0.98);
   border: none;
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
-  border-radius: 16px; 
-  padding: 1.75rem; 
-  margin-bottom: 16px; 
+  border-radius: 16px;
+  padding: 1.75rem;
+  margin-bottom: 0.5rem;
   transition: transform 0.2s, box-shadow 0.2s;
 }
 .card:hover {
   transform: translateY(-2px);
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
 }
-.quiz-options { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
-.quiz-option-btn { 
-  padding: 12px 16px; 
-  border: 2px solid #e2e8f0; 
-  border-radius: 10px; 
-  background: #fff; 
-  text-align: left; 
-  cursor: pointer; 
-  font-size: 15px; 
+.quiz-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 8px;
+  max-height: 280px;
+  overflow-y: auto;
+  padding-right: 6px;
+}
+.quiz-option-btn {
+  padding: 6px 8px;
+  border: 2px solid #e2e8f0;
+  border-radius: 10px;
+  background: #fff;
+  text-align: left;
+  cursor: pointer;
+  font-size: 15px;
   font-weight: 500;
   color: #4a5568;
   transition: all 0.2s;
 }
-.quiz-option-btn:hover { 
-  background: #f7fafc; 
+.quiz-option-btn:hover {
+  background: #f7fafc;
   border-color: #cbd5e0;
   transform: translateX(4px);
 }
-.quiz-option-btn.correct { 
-  background: #c6f6d5; 
-  border-color: #48bb78; 
-  color: #22543d; 
+.quiz-option-btn.correct {
+  background: #c6f6d5;
+  border-color: #48bb78;
+  color: #22543d;
 }
-.quiz-option-btn.wrong { 
-  background: #fed7d7; 
-  border-color: #f56565; 
-  color: #742a2a; 
+.quiz-option-btn.wrong {
+  background: #fed7d7;
+  border-color: #f56565;
+  color: #742a2a;
 }
-.quiz-feedback { 
-  text-align: center; 
-  margin-top: 12px; 
-  font-size: 15px; 
-  font-weight: 600; 
-  min-height: 24px; 
+.quiz-feedback {
+  text-align: center;
+  margin-top: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  min-height: 24px;
   padding: 8px 16px;
   border-radius: 8px;
 }
-.quiz-feedback.correct { 
+.quiz-feedback.correct {
   color: #22543d;
   background: #c6f6d5;
 }
-.quiz-feedback.wrong { 
+.quiz-feedback.wrong {
   color: #742a2a;
   background: #fed7d7;
 }
 .word-display { text-align: center; padding: 0.5rem 0.5rem 1rem; }
-.year-badge { 
-  display: inline-block; 
-  font-size: 12px; 
-  font-weight: 600; 
+.year-badge {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 600;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: #fff; 
-  padding: 6px 14px; 
-  border-radius: 20px; 
+  color: #fff;
+  padding: 6px 14px;
+  border-radius: 20px;
   margin-bottom: 16px;
   box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
 }
-.word-en { 
-  font-size: 32px; 
-  font-weight: 700; 
-  color: #2d3748; 
-  margin-bottom: 8px; 
-  letter-spacing: -0.5px; 
+.word-en {
+  font-size: 32px;
+  font-weight: 700;
+  color: #2d3748;
+  margin-bottom: 8px;
+  letter-spacing: -0.5px;
 }
-.word-zh { 
-  font-size: 16px; 
-  color: #4a5568; 
+.word-zh {
+  font-size: 16px;
+  color: #4a5568;
   margin-bottom: 12px;
   font-weight: 500;
 }
-.options-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin-top: 12px; }
-.opt-chip { 
-  font-size: 12px; 
-  padding: 4px 12px; 
-  border-radius: 16px; 
-  background: #edf2f7; 
-  color: #718096; 
+.options-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 12px;
+  max-height: 160px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+.opt-chip {
+  font-size: 12px;
+  padding: 4px 12px;
+  border-radius: 16px;
+  background: #edf2f7;
+  color: #718096;
   border: 1px solid #e2e8f0;
   font-weight: 500;
   transition: all 0.2s;
@@ -128,75 +145,75 @@ body {
   border-color: #cbd5e0;
   color: #4a5568;
 }
-.opt-chip.active { 
+.opt-chip.active {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: #fff; 
-  border-color: transparent; 
+  color: #fff;
+  border-color: transparent;
   font-weight: 600;
   box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
   cursor: default;
 }
-.word-num { 
-  font-size: 13px; 
-  color: #a0aec0; 
+.word-num {
+  font-size: 13px;
+  color: #a0aec0;
   margin-top: 12px;
   font-weight: 500;
 }
-.progress-bar-wrap { 
-  background: #edf2f7; 
-  border-radius: 8px; 
-  height: 6px; 
-  margin-bottom: 1.25rem; 
-  overflow: hidden; 
+.progress-bar-wrap {
+  background: #edf2f7;
+  border-radius: 8px;
+  height: 6px;
+  margin-bottom: 1.25rem;
+  overflow: hidden;
 }
-.progress-bar { 
-  height: 6px; 
+.progress-bar {
+  height: 6px;
   background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-  border-radius: 8px; 
-  transition: width 0.4s ease; 
+  border-radius: 8px;
+  transition: width 0.4s ease;
 }
-.controls { 
-  display: flex; 
-  align-items: center; 
-  justify-content: center; 
-  gap: 12px; 
-  margin-bottom: 8px; 
+.controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 8px;
 }
-.btn { 
-  border: none; 
-  background: #edf2f7; 
-  color: #4a5568; 
-  border-radius: 10px; 
-  padding: 10px 18px; 
-  font-size: 14px; 
+.btn {
+  border: none;
+  background: #edf2f7;
+  color: #4a5568;
+  border-radius: 10px;
+  padding: 10px 18px;
+  font-size: 14px;
   font-weight: 600;
-  cursor: pointer; 
-  font-family: inherit; 
-  transition: all 0.2s; 
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s;
 }
-.btn:hover { 
+.btn:hover {
   background: #e2e8f0;
   transform: translateY(-1px);
 }
-.btn:active { 
-  transform: scale(0.96); 
+.btn:active {
+  transform: scale(0.96);
 }
-.btn-play { 
+.btn-play {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: #fff; 
-  border: none; 
-  padding: 12px 32px; 
-  font-size: 15px; 
+  color: #fff;
+  border: none;
+  padding: 12px 32px;
+  font-size: 15px;
   font-weight: 600;
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
 }
-.btn-play:hover { 
+.btn-play:hover {
   opacity: 0.9;
   box-shadow: 0 6px 16px rgba(102, 126, 234, 0.5);
 }
-.settings { 
-  border-top: 1px solid #e2e8f0; 
-  padding-top: 16px; 
+.settings {
+  border-top: 1px solid #e2e8f0;
+  padding-top: 16px;
   margin-top: 8px;
 }
 .settings > div:first-child {
@@ -205,21 +222,21 @@ body {
   color: #2d3748;
   margin-bottom: 12px;
 }
-.setting-row { 
-  display: flex; 
-  align-items: center; 
-  gap: 12px; 
-  margin-bottom: 12px; 
-  font-size: 14px; 
-  color: #718096; 
+.setting-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+  font-size: 14px;
+  color: #718096;
 }
-.setting-row label { 
-  flex: 0 0 70px; 
+.setting-row label {
+  flex: 0 0 70px;
   font-weight: 500;
   color: #4a5568;
 }
-.setting-row input[type=range] { 
-  flex: 1; 
+.setting-row input[type=range] {
+  flex: 1;
   height: 6px;
   border-radius: 3px;
   background: #e2e8f0;
@@ -235,29 +252,29 @@ body {
   cursor: pointer;
   box-shadow: 0 2px 6px rgba(102, 126, 234, 0.4);
 }
-.setting-row span { 
-  font-size: 14px; 
-  color: #2d3748; 
-  min-width: 50px; 
-  text-align: right; 
+.setting-row span {
+  font-size: 14px;
+  color: #2d3748;
+  min-width: 50px;
+  text-align: right;
   font-weight: 600;
 }
-.status { 
-  text-align: center; 
-  font-size: 13px; 
-  color: #fff; 
-  margin-top: 12px; 
+.status {
+  text-align: center;
+  font-size: 13px;
+  color: #fff;
+  margin-top: 12px;
   font-weight: 500;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
-select { 
-  border: 1px solid #e2e8f0; 
-  border-radius: 8px; 
-  background: #fff; 
-  color: #2d3748; 
-  font-size: 14px; 
-  padding: 6px 12px; 
-  font-family: inherit; 
+select {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #fff;
+  color: #2d3748;
+  font-size: 14px;
+  padding: 6px 12px;
+  font-family: inherit;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s;
@@ -371,12 +388,23 @@ input[type=checkbox] {
 .word-display {
   position: relative;
 }
+.options-row::-webkit-scrollbar,
+.quiz-options::-webkit-scrollbar { width: 4px; }
+.options-row::-webkit-scrollbar-track,
+.quiz-options::-webkit-scrollbar-track { background: transparent; }
+.options-row::-webkit-scrollbar-thumb,
+.quiz-options::-webkit-scrollbar-thumb {
+  background: #cbd5e0;
+  border-radius: 2px;
+}
+.options-row::-webkit-scrollbar-thumb:hover,
+.quiz-options::-webkit-scrollbar-thumb:hover { background: #a0aec0; }
 </style>
 </head>
 <body>
 <div id="app">
   <div class="header">
-    <h1>高醫英文單字 — 全選項美式發音</h1>
+    <h1>高醫英文單字 — 美式發音</h1>
     <div class="mode-buttons">
       <button class="btn btn-mode" id="mode-practice" onclick="switchMode('practice')">練習模式</button>
       <button class="btn btn-mode" id="mode-quiz" onclick="switchMode('quiz')">測驗模式</button>
