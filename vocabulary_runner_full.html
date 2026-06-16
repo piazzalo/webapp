@@ -1316,6 +1316,9 @@ function showWord() {
         frag.appendChild(chip);
       });
       els.optsRow.appendChild(frag);
+      // 自動將 active chip 捲動到 options-row 可見範圍內
+      const activeChip = els.optsRow.querySelector('.opt-chip.active');
+      if (activeChip) activeChip.scrollIntoView({ block: 'nearest', inline: 'nearest' });
     }
   }
 }
